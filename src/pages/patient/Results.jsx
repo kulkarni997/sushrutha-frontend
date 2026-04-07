@@ -61,22 +61,22 @@ const SEVERITY_CONFIG = {
     label: '🌿 Mild imbalance detected — self-care recommended',
   },
   moderate: {
-    bg: 'bg-turmeric/20',
-    border: 'border-turmeric',
-    text: 'text-turmeric',
+    bg: 'bg-primary/20',
+    border: 'border-primary',
+    text: 'text-primary',
     label: '⚠ Moderate imbalance — consult a doctor alongside these tips',
   },
   severe: {
-    bg: 'bg-kumkum/20',
-    border: 'border-kumkum',
-    text: 'text-kumkum',
+    bg: 'bg-error/20',
+    border: 'border-error',
+    text: 'text-error',
     label: '🔴 Significant imbalance — please consult a BAMS doctor',
   },
 }
 
 const DOSHA_BAR_COLOR = {
-  Vata: 'bg-turmeric',
-  Pitta: 'bg-kumkum',
+  Vata: 'bg-primary',
+  Pitta: 'bg-error',
   Kapha: 'bg-neem',
 }
 
@@ -96,9 +96,9 @@ function DoshaBar({ name, value, dominant }) {
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
-          <span className="font-sans text-sm text-cream">{name}</span>
+          <span className="font-sans text-sm text-textMain">{name}</span>
           {dominant && (
-            <span className="bg-turmeric/20 text-turmeric font-sans text-xs px-2 py-0.5 rounded-full">
+            <span className="bg-primary/20 text-primary font-sans text-xs px-2 py-0.5 rounded-full">
               Dominant
             </span>
           )}
@@ -122,7 +122,7 @@ function RecipeCard({ line }) {
   const instruction = line.slice(colonIdx + 1).trim()
   return (
     <div className="bg-surface border border-border rounded-card p-4">
-      <p className="font-sans text-sm font-semibold text-turmeric mb-1">{herb}</p>
+      <p className="font-sans text-sm font-semibold text-primary mb-1">{herb}</p>
       <p className="font-sans text-sm text-muted">{instruction}</p>
     </div>
   )
@@ -187,12 +187,12 @@ export default function Results() {
   }
 
   return (
-    <div className="min-h-screen bg-bg text-cream font-sans">
+    <div className="min-h-screen bg-bg text-textMain font-sans">
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 pt-6 pb-2">
         <button
           onClick={() => navigate('/')}
-          className="font-display text-turmeric text-xl tracking-widest"
+          className="font-display text-primary text-xl tracking-widest"
         >
           SUSHRUTHA AI
         </button>
@@ -200,7 +200,7 @@ export default function Results() {
           <span className="text-muted text-sm">{user?.name}</span>
           <button
             onClick={handleLogout}
-            className="text-hint text-xs hover:text-kumkum transition-colors duration-200"
+            className="text-hint text-xs hover:text-error transition-colors duration-200"
           >
             Logout
           </button>
@@ -215,7 +215,7 @@ export default function Results() {
 
         {/* 2. Dosha chart */}
         <section>
-          <h2 className="font-display text-3xl text-cream mb-6">Your Dosha Profile</h2>
+          <h2 className="font-display text-3xl text-textMain mb-6">Your Dosha Profile</h2>
           <div className="bg-surface border border-border rounded-card p-6">
             <DoshaBar name="Vata" value={r.vata} dominant={r.dominant === 'Vata'} />
             <DoshaBar name="Pitta" value={r.pitta} dominant={r.dominant === 'Pitta'} />
@@ -225,7 +225,7 @@ export default function Results() {
 
         {/* 3. Recipe — plan-gated */}
         <section>
-          <h2 className="font-display text-2xl text-cream mb-4">Your Ayurvedic Recipe</h2>
+          <h2 className="font-display text-2xl text-textMain mb-4">Your Ayurvedic Recipe</h2>
           <PlanGate feature="full_recipe" blur>
             <div className="flex flex-col gap-3">
               {recipeLines.map((line) => (
@@ -238,11 +238,11 @@ export default function Results() {
         {/* 4. Yoga — always shown for mild */}
         {r.severity === 'mild' && (
           <section>
-            <h2 className="font-display text-2xl text-cream mb-4">Recommended Practices</h2>
+            <h2 className="font-display text-2xl text-textMain mb-4">Recommended Practices</h2>
             <div className="flex flex-col gap-3">
               {VATA_YOGA.map((item) => (
                 <div key={item.title} className="bg-surface border border-border rounded-card p-4">
-                  <p className="font-sans text-sm font-semibold text-cream mb-1">{item.title}</p>
+                  <p className="font-sans text-sm font-semibold text-textMain mb-1">{item.title}</p>
                   <p className="font-sans text-sm text-muted">{item.desc}</p>
                 </div>
               ))}
@@ -252,7 +252,7 @@ export default function Results() {
 
         {/* 5. Forecast — plan-gated */}
         <section>
-          <h2 className="font-display text-2xl text-cream mb-4">14-Day Healing Forecast</h2>
+          <h2 className="font-display text-2xl text-textMain mb-4">14-Day Healing Forecast</h2>
           <PlanGate feature="forecast" blur>
             <ForecastChart forecast={r.forecast} />
           </PlanGate>
@@ -260,7 +260,7 @@ export default function Results() {
 
         {/* 6. Doctor map */}
         <section>
-          <h2 className="font-display text-2xl text-cream mb-4">Find a BAMS Doctor</h2>
+          <h2 className="font-display text-2xl text-textMain mb-4">Find a BAMS Doctor</h2>
           <div className="bg-surface border border-border rounded-card p-6 flex flex-col items-center text-center gap-3">
             <p className="font-sans text-sm text-muted">
               🗺 Doctor map will load here — connecting to verified BAMS doctors nearby
@@ -268,7 +268,7 @@ export default function Results() {
             <p className="font-sans text-sm text-muted">
               Share your report with a doctor to get personalised guidance.
             </p>
-            <button className="bg-turmeric text-bg rounded-full px-6 py-2 text-sm font-sans mt-1">
+            <button className="bg-primary text-bg rounded-full px-6 py-2 text-sm font-sans mt-1">
               Share Report
             </button>
           </div>

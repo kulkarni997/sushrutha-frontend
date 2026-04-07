@@ -7,16 +7,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#0D0B08',
-        surface: '#1C1712',
-        border: '#2E2820',
-        turmeric: '#E8A020',
-        sandalwood: '#C4845A',
+        bg: '#FAF7F2',
+        surface: '#FFFFFF',
+        surfaceAlt: '#F5EFE6',
+        border: '#E8E0D5',
+        primary: '#C45C1A',
+        'primary-h': '#A34A12',
+        accent: '#E8834A',
+        textMain: '#1A1208',
+        muted: '#6B5E50',
+        hint: '#A89880',
         neem: '#4A7C59',
-        kumkum: '#C0392B',
-        cream: '#F5EDD6',
-        muted: '#A89880',
-        hint: '#6B5E50',
+        error: '#C0392B',
+        warning: '#D4A017',
       },
       fontFamily: {
         display: ['Cormorant Garamond', 'serif'],

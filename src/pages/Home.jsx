@@ -65,7 +65,7 @@ export default function Home() {
 
   return (
     <div
-      className="relative min-h-screen bg-bg text-cream font-sans overflow-hidden flex flex-col"
+      className="relative min-h-screen bg-bg text-textMain font-sans overflow-hidden flex flex-col"
       style={{
         backgroundImage:
           'url(https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=1920&q=80)',
@@ -74,11 +74,8 @@ export default function Home() {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Dark warm overlay */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{ backgroundColor: 'rgba(13, 11, 8, 0.75)' }}
-      />
+      {/* Light overlay */}
+      <div className="absolute inset-0 z-0 bg-white/70" />
 
       {/* Mandala pattern */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -86,13 +83,13 @@ export default function Home() {
       </div>
 
       {/* Navbar */}
-      <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-6">
-        <span className="font-display text-turmeric text-lg tracking-widest uppercase">
+      <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-6 bg-white/80 backdrop-blur-sm">
+        <span className="font-display text-primary text-lg tracking-widest uppercase">
           Sushrutha AI
         </span>
         <button
           onClick={() => navigate('/login')}
-          className="text-muted hover:text-cream text-sm font-sans transition-colors duration-200"
+          className="text-primary text-sm font-sans transition-colors duration-200"
         >
           Login
         </button>
@@ -100,15 +97,15 @@ export default function Home() {
 
       {/* Hero content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
-        <h1 className="font-display text-6xl md:text-8xl text-cream font-normal tracking-wide leading-tight mb-4">
+        <h1 className="font-display text-6xl md:text-8xl text-primary font-semibold tracking-wide leading-tight mb-4">
           Sushrutha AI
         </h1>
 
-        <p className="font-sans text-lg text-muted tracking-widest uppercase mb-6">
+        <p className="text-sm tracking-widest text-muted font-sans uppercase mb-6">
           Ancient wisdom. Modern diagnosis.
         </p>
 
-        <p className="font-sans text-sm text-hint max-w-md text-center leading-relaxed mb-10">
+        <p className="text-textMain font-sans text-sm max-w-md text-center leading-relaxed mb-10">
           AI-powered Ayurvedic screening for patients and BAMS doctors.
           <br className="hidden sm:block" />
           Understand your dosha from home — tongue, voice, and pulse analysis.
@@ -116,7 +113,7 @@ export default function Home() {
 
         <button
           onClick={() => navigate('/role')}
-          className="bg-turmeric text-bg font-sans font-medium px-8 py-3 rounded-full hover:bg-sandalwood hover:scale-105 transition-all duration-300 mb-8"
+          className="bg-primary text-bg font-sans font-medium px-8 py-3 rounded-full hover:bg-accent hover:scale-105 transition-all duration-300 mb-8"
         >
           Get Started
         </button>
@@ -126,7 +123,7 @@ export default function Home() {
           {['Tongue Analysis', 'Voice Dosha', 'Pulse Screening'].map((label) => (
             <span
               key={label}
-              className="border border-border text-muted text-xs px-4 py-1.5 rounded-full font-sans tracking-wide"
+              className="border border-primary text-primary font-sans text-sm px-5 py-2 rounded-full bg-white/80"
             >
               {label}
             </span>

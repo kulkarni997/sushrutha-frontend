@@ -34,7 +34,7 @@ export default function Login() {
 
   return (
     <div
-      className="relative min-h-screen bg-bg text-cream font-sans flex flex-col overflow-hidden"
+      className="relative min-h-screen bg-bg text-textMain font-sans flex flex-col overflow-hidden"
       style={{
         backgroundImage:
           'url(https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=1920&q=80)',
@@ -51,13 +51,13 @@ export default function Login() {
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(13, 11, 8, 0.60)' }} />
         <button
           onClick={() => navigate('/')}
-          className="relative font-display text-turmeric text-xl tracking-widest uppercase cursor-pointer"
+          className="relative font-display text-primary text-xl tracking-widest uppercase cursor-pointer"
         >
           Sushrutha AI
         </button>
         <button
           onClick={() => navigate('/role')}
-          className="relative text-muted hover:text-cream text-sm font-sans cursor-pointer transition-colors duration-200"
+          className="relative text-muted hover:text-textMain text-sm font-sans cursor-pointer transition-colors duration-200"
         >
           Back
         </button>
@@ -67,7 +67,7 @@ export default function Login() {
       <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 pt-24 pb-16">
         <div className="bg-surface border border-border rounded-card p-8 w-full max-w-sm mx-auto">
 
-          <h1 className="font-display text-3xl text-cream font-normal mb-1">
+          <h1 className="font-display text-3xl text-textMain font-normal mb-1">
             Welcome back
           </h1>
           <p className="font-sans text-sm text-muted mb-8">
@@ -87,7 +87,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-cream text-sm font-sans placeholder:text-hint focus:outline-none focus:border-turmeric focus:ring-1 focus:ring-turmeric transition-colors duration-200"
+                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-textMain text-sm font-sans placeholder:text-hint focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-200"
               />
             </div>
 
@@ -102,20 +102,20 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-cream text-sm font-sans placeholder:text-hint focus:outline-none focus:border-turmeric focus:ring-1 focus:ring-turmeric transition-colors duration-200"
+                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-textMain text-sm font-sans placeholder:text-hint focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-200"
               />
             </div>
 
             {/* Error */}
             {error && (
-              <p className="text-kumkum text-xs font-sans mt-1 mb-2">{error}</p>
+              <p className="text-error text-xs font-sans mt-1 mb-2">{error}</p>
             )}
 
             {/* Sign In button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-turmeric text-bg font-sans font-medium text-sm py-3 rounded-full mt-2 hover:bg-sandalwood transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-primary text-bg font-sans font-medium text-sm py-3 rounded-full mt-2 hover:bg-accent transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
@@ -131,7 +131,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => navigate('/role')}
-              className="w-full border border-border text-muted font-sans text-sm py-3 rounded-full hover:border-turmeric hover:text-cream transition-all duration-300"
+              className="w-full border border-border text-muted font-sans text-sm py-3 rounded-full hover:border-primary hover:text-textMain transition-all duration-300"
             >
               Create an account
             </button>

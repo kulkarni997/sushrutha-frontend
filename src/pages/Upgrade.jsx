@@ -10,7 +10,7 @@ const PLANS = [
     price: '₹0',
     colorClass: 'text-hint',
     borderClass: 'border border-border',
-    priceClass: 'text-cream',
+    priceClass: 'text-textMain',
     buttonClass: 'bg-surface border border-border text-hint cursor-not-allowed',
     buttonLabel: 'Current Plan',
     features: [
@@ -27,10 +27,10 @@ const PLANS = [
     key: 'basic',
     label: 'BASIC',
     price: '₹99',
-    colorClass: 'text-turmeric',
-    borderClass: 'border-2 border-turmeric',
-    priceClass: 'text-turmeric',
-    buttonClass: 'bg-turmeric text-bg hover:opacity-90',
+    colorClass: 'text-primary',
+    borderClass: 'border-2 border-primary',
+    priceClass: 'text-primary',
+    buttonClass: 'bg-primary text-bg hover:opacity-90',
     buttonLabel: 'Upgrade to Basic',
     upgradePlan: 'basic',
     features: [
@@ -46,10 +46,10 @@ const PLANS = [
     key: 'pro',
     label: 'PRO',
     price: '₹299',
-    colorClass: 'text-sandalwood',
-    borderClass: 'border border-sandalwood',
-    priceClass: 'text-sandalwood',
-    buttonClass: 'bg-sandalwood text-bg hover:opacity-90',
+    colorClass: 'text-accent',
+    borderClass: 'border border-accent',
+    priceClass: 'text-accent',
+    buttonClass: 'bg-accent text-bg hover:opacity-90',
     buttonLabel: 'Upgrade to Pro',
     upgradePlan: 'pro',
     features: [
@@ -68,7 +68,7 @@ const PLANS = [
     colorClass: 'text-neem',
     borderClass: 'border border-neem',
     priceClass: 'text-neem',
-    buttonClass: 'bg-neem text-cream hover:opacity-90',
+    buttonClass: 'bg-neem text-textMain hover:opacity-90',
     buttonLabel: 'Upgrade to Family',
     upgradePlan: 'pro_family',
     features: [
@@ -105,18 +105,18 @@ export default function Upgrade() {
   const planLabel = currentPlan === 'pro_family' ? 'FAMILY' : currentPlan.toUpperCase()
 
   return (
-    <div className="min-h-screen bg-bg text-cream font-sans">
+    <div className="min-h-screen bg-bg text-textMain font-sans">
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-border">
         <button
           onClick={() => navigate('/')}
-          className="font-display text-lg text-cream tracking-wide"
+          className="font-display text-lg text-textMain tracking-wide"
         >
           SUSHRUTHA AI
         </button>
         <button
           onClick={() => navigate(-1)}
-          className="text-sm text-muted hover:text-cream transition-colors"
+          className="text-sm text-muted hover:text-textMain transition-colors"
         >
           Back
         </button>
@@ -124,21 +124,21 @@ export default function Upgrade() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-neem text-cream text-sm px-5 py-2 rounded-full shadow-lg">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-neem text-textMain text-sm px-5 py-2 rounded-full shadow-lg">
           {toast}
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-kumkum text-cream text-sm px-5 py-2 rounded-full shadow-lg">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-error text-textMain text-sm px-5 py-2 rounded-full shadow-lg">
           {error}
         </div>
       )}
 
       {/* Hero */}
       <div className="flex flex-col items-center pt-12 pb-4 px-6">
-        <h1 className="font-display text-4xl text-cream mb-2 text-center">
+        <h1 className="font-display text-4xl text-textMain mb-2 text-center">
           Choose your plan
         </h1>
         <p className="font-sans text-sm text-muted mb-8 text-center">

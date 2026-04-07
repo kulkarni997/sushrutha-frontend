@@ -21,13 +21,13 @@ function StepIndicator({ step }) {
         <div key={n} className="flex items-center">
           <div
             className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-              n <= step ? 'bg-turmeric' : 'bg-border'
+              n <= step ? 'bg-primary' : 'bg-border'
             }`}
           />
           {i < 3 && (
             <div
               className={`w-10 h-px transition-colors duration-300 ${
-                n < step ? 'bg-turmeric' : 'bg-border'
+                n < step ? 'bg-primary' : 'bg-border'
               }`}
             />
           )}
@@ -42,7 +42,7 @@ function StepIndicator({ step }) {
 function StepSymptoms({ symptoms, setSymptoms, onNext }) {
   return (
     <div className="flex flex-col w-full">
-      <h1 className="font-display text-4xl text-cream mb-2">How are you feeling?</h1>
+      <h1 className="font-display text-4xl text-textMain mb-2">How are you feeling?</h1>
       <p className="font-sans text-sm text-muted mb-6">
         Describe your symptoms in your own words.
       </p>
@@ -50,13 +50,13 @@ function StepSymptoms({ symptoms, setSymptoms, onNext }) {
         value={symptoms}
         onChange={(e) => setSymptoms(e.target.value.slice(0, 500))}
         placeholder="e.g. I've been feeling bloated, tired, and my skin feels dry..."
-        className="w-full bg-surface border border-border rounded-card px-4 py-3 text-cream text-sm font-sans placeholder:text-hint resize-none h-32 focus:outline-none focus:border-turmeric focus:ring-1 focus:ring-turmeric"
+        className="w-full bg-surface border border-border rounded-card px-4 py-3 text-textMain text-sm font-sans placeholder:text-hint resize-none h-32 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
       />
       <p className="text-hint text-xs text-right mt-1">{symptoms.length}/500</p>
       <button
         onClick={onNext}
         disabled={symptoms.length < 20}
-        className="bg-turmeric text-bg rounded-full px-8 py-3 text-sm font-sans mt-6 self-center disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200"
+        className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans mt-6 self-center disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200"
       >
         Continue
       </button>
@@ -114,14 +114,14 @@ function StepCamera({ capturedImage, setCapturedImage, onNext }) {
 
   return (
     <div className="flex flex-col w-full">
-      <h1 className="font-display text-4xl text-cream mb-2">Take a tongue photo</h1>
+      <h1 className="font-display text-4xl text-textMain mb-2">Take a tongue photo</h1>
       <p className="font-sans text-sm text-muted mb-6">
         Stick out your tongue in good lighting.
       </p>
 
       <div className="w-full max-w-sm mx-auto">
         {cameraError ? (
-          <p className="text-kumkum text-sm text-center py-8">
+          <p className="text-error text-sm text-center py-8">
             Camera access denied. Please allow camera in browser settings.
           </p>
         ) : capturedImage ? (
@@ -140,7 +140,7 @@ function StepCamera({ capturedImage, setCapturedImage, onNext }) {
               </button>
               <button
                 onClick={onNext}
-                className="bg-turmeric text-bg rounded-full px-8 py-3 text-sm font-sans"
+                className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans"
               >
                 Looks good
               </button>
@@ -169,7 +169,7 @@ function StepCamera({ capturedImage, setCapturedImage, onNext }) {
               <button
                 onClick={capture}
                 disabled={!cameraReady}
-                className="bg-turmeric text-bg rounded-full px-8 py-3 text-sm font-sans disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Capture
               </button>
@@ -234,7 +234,7 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
 
   return (
     <div className="flex flex-col w-full">
-      <h1 className="font-display text-4xl text-cream mb-2">Record your voice</h1>
+      <h1 className="font-display text-4xl text-textMain mb-2">Record your voice</h1>
       <p className="font-sans text-sm text-muted mb-6">
         Speak for 10 seconds in Kannada, Hindi, or English.
       </p>
@@ -253,7 +253,7 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
               </button>
               <button
                 onClick={onNext}
-                className="bg-turmeric text-bg rounded-full px-8 py-3 text-sm font-sans"
+                className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans"
               >
                 Continue
               </button>
@@ -261,8 +261,8 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
           </>
         ) : recording ? (
           <>
-            <div className="w-16 h-16 rounded-full bg-kumkum animate-pulse" />
-            <p className="font-mono text-4xl text-cream">{mins}:{secs}</p>
+            <div className="w-16 h-16 rounded-full bg-error animate-pulse" />
+            <p className="font-mono text-4xl text-textMain">{mins}:{secs}</p>
             <p className="text-muted text-sm font-sans">Recording...</p>
           </>
         ) : (
@@ -270,7 +270,7 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
             <span className="text-5xl text-muted">🎙</span>
             <button
               onClick={startRecording}
-              className="bg-turmeric text-bg rounded-full px-8 py-3 text-sm font-sans"
+              className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans"
             >
               Start Recording
             </button>
@@ -286,7 +286,7 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
 function StepSensor({ onChoose }) {
   return (
     <div className="flex flex-col w-full">
-      <h1 className="font-display text-4xl text-cream mb-2">Connect pulse sensor</h1>
+      <h1 className="font-display text-4xl text-textMain mb-2">Connect pulse sensor</h1>
       <p className="font-sans text-sm text-muted mb-6">
         Optional: pair your ESP32 pulse sensor for heart-rate data.
       </p>
@@ -367,15 +367,15 @@ export default function Scan() {
   }
 
   return (
-    <div className="min-h-screen bg-bg text-cream font-sans flex flex-col">
+    <div className="min-h-screen bg-bg text-textMain font-sans flex flex-col">
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 pt-6 pb-2 shrink-0">
-        <span className="font-display text-turmeric text-xl tracking-widest">SUSHRUTHA AI</span>
+        <span className="font-display text-primary text-xl tracking-widest">SUSHRUTHA AI</span>
         <div className="flex items-center gap-4">
           <span className="text-muted text-sm">{user?.name}</span>
           <button
             onClick={handleLogout}
-            className="text-hint text-xs hover:text-kumkum transition-colors duration-200"
+            className="text-hint text-xs hover:text-error transition-colors duration-200"
           >
             Logout
           </button>

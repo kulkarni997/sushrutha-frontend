@@ -1,70 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-bg: #0D0B08;
-  --color-surface: #1C1712;
-  --color-border: #2E2820;
-  --color-turmeric: #E8A020;
-  --color-sandalwood: #C4845A;
-  --color-neem: #4A7C59;
-  --color-kumkum: #C0392B;
-  --color-cream: #F5EDD6;
-  --color-muted: #A89880;
-  --color-hint: #6B5E50;
+@layer base {
+  body {
+    background-color: #FAF7F2;
+    color: #1A1208;
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  * {
+    border-color: #E8E0D5;
+  }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white font-sans font-medium px-6 py-3 rounded-full transition-all duration-200;
+  }
+
+  .btn-outline {
+    @apply border border-primary text-primary font-sans font-medium px-6 py-3 rounded-full transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-surface border border-border rounded-xl p-6 shadow-sm;
+  }
+
+  .input {
+    @apply bg-surfaceAlt border border-border rounded-xl px-4 py-3 text-textMain font-sans text-sm focus:outline-none w-full;
+  }
+
+  .badge {
+    @apply text-xs font-sans px-3 py-1 rounded-full;
+  }
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
+@layer utilities {
+  .font-display {
+    font-family: 'Cormorant Garamond', serif;
+  }
 
-body {
-  background-color: #0D0B08;
-  color: #F5EDD6;
-  font-family: 'DM Sans', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23grain)' opacity='1'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 300px 300px;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #0D0B08;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #2E2820;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #6B5E50;
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
 }

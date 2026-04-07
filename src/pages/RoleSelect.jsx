@@ -6,31 +6,20 @@ export default function RoleSelect() {
   const [hovered, setHovered] = useState(null);
 
   return (
-    <div
-      className="relative min-h-screen bg-bg text-cream font-sans flex flex-col overflow-hidden"
-      style={{
-        backgroundImage:
-          'url(https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=1920&q=80)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 z-0" style={{ backgroundColor: 'rgba(13, 11, 8, 0.80)' }} />
+    <div className="min-h-screen bg-bg flex flex-col items-center justify-center px-6">
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-20 flex justify-between items-center px-8 py-5">
         <div className="absolute inset-0 bg-bg" style={{ opacity: 0.6 }} />
         <button
           onClick={() => navigate('/')}
-          className="relative font-display text-turmeric text-xl tracking-widest uppercase"
+          className="relative font-display text-primary text-xl tracking-widest uppercase"
         >
           Sushrutha AI
         </button>
         <button
           onClick={() => navigate('/')}
-          className="relative text-muted hover:text-cream text-sm font-sans cursor-pointer transition-colors duration-200"
+          className="relative text-muted hover:text-textMain text-sm font-sans cursor-pointer transition-colors duration-200"
         >
           Back
         </button>
@@ -40,10 +29,10 @@ export default function RoleSelect() {
       <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 text-center gap-10 pt-24 pb-16">
 
         <div>
-          <h1 className="font-display text-5xl md:text-6xl text-cream font-normal tracking-wide mb-2">
+          <h1 className="font-display text-5xl text-primary font-semibold text-center mb-3">
             Who are you?
           </h1>
-          <p className="font-sans text-sm text-muted tracking-wide">
+          <p className="text-muted font-sans text-center mb-12">
             Tell us how you'll be using Sushrutha AI today.
           </p>
         </div>
@@ -64,7 +53,7 @@ export default function RoleSelect() {
             onMouseLeave={() => setHovered(null)}
           >
             <div className="text-4xl mb-4">🌿</div>
-            <h2 className="font-display text-2xl text-cream font-normal mb-2">
+            <h2 className="font-display text-2xl text-textMain font-normal mb-2">
               I'm here for myself
             </h2>
             <p className="font-sans text-sm text-muted leading-relaxed mb-6">
@@ -88,8 +77,8 @@ export default function RoleSelect() {
             onMouseEnter={() => setHovered('doctor')}
             onMouseLeave={() => setHovered(null)}
           >
-            <div className="text-4xl text-sandalwood mb-4">✦</div>
-            <h2 className="font-display text-2xl text-cream font-normal mb-2">
+            <div className="text-4xl text-accent mb-4">✦</div>
+            <h2 className="font-display text-2xl text-textMain font-normal mb-2">
               I'm a BAMS Doctor
             </h2>
             <p className="font-sans text-sm text-muted leading-relaxed mb-6">
@@ -106,7 +95,7 @@ export default function RoleSelect() {
         <p className="font-sans text-sm text-muted">
           Already have an account?{' '}
           <span
-            className="text-turmeric hover:text-sandalwood cursor-pointer transition-colors duration-200"
+            className="text-primary hover:text-accent cursor-pointer transition-colors duration-200"
             onClick={() => navigate('/login')}
           >
             Login

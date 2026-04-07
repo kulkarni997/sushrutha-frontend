@@ -10,15 +10,15 @@ const mockPatients = [
 ]
 
 const DOSHA_BADGE = {
-  Vata:  'bg-turmeric/20 text-turmeric',
-  Pitta: 'bg-kumkum/20 text-kumkum',
+  Vata:  'bg-primary/20 text-primary',
+  Pitta: 'bg-error/20 text-error',
   Kapha: 'bg-neem/20 text-neem',
 }
 
 const SEVERITY_DOT = {
   mild:     'bg-neem',
-  moderate: 'bg-turmeric',
-  severe:   'bg-kumkum',
+  moderate: 'bg-primary',
+  severe:   'bg-error',
 }
 
 // ─── Patient card ─────────────────────────────────────────────────────────────
@@ -27,12 +27,12 @@ function PatientCard({ patient, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="bg-surface border border-border rounded-card p-4 hover:border-turmeric transition-all duration-200 cursor-pointer"
+      className="bg-surface border border-border rounded-card p-4 hover:border-primary transition-all duration-200 cursor-pointer"
     >
       <div className="flex items-center gap-2 mb-2">
-        <span className="font-sans font-medium text-cream text-sm">{patient.name}</span>
+        <span className="font-sans font-medium text-textMain text-sm">{patient.name}</span>
         {patient.new && (
-          <span className="bg-turmeric text-bg text-xs px-2 py-0.5 rounded-full font-sans">
+          <span className="bg-primary text-bg text-xs px-2 py-0.5 rounded-full font-sans">
             NEW
           </span>
         )}
@@ -71,7 +71,7 @@ export default function DoctorDashboard() {
   const firstName = user?.name?.split(' ')[0] ?? 'Doctor'
 
   return (
-    <div className="min-h-screen bg-bg text-cream font-sans">
+    <div className="min-h-screen bg-bg text-textMain font-sans">
 
       {/* Toast */}
       {toast && (
@@ -82,18 +82,18 @@ export default function DoctorDashboard() {
 
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 pt-6 pb-2">
-        <span className="font-display text-turmeric text-xl tracking-widest">SUSHRUTHA AI</span>
+        <span className="font-display text-primary text-xl tracking-widest">SUSHRUTHA AI</span>
         <div className="flex items-center gap-6">
           <span className="text-muted text-sm">{user?.name}</span>
           <button
             onClick={() => navigate('/doctor/analytics')}
-            className="text-muted text-sm hover:text-cream transition-colors duration-200"
+            className="text-muted text-sm hover:text-textMain transition-colors duration-200"
           >
             Analytics
           </button>
           <button
             onClick={handleLogout}
-            className="text-hint text-xs hover:text-kumkum transition-colors duration-200"
+            className="text-hint text-xs hover:text-error transition-colors duration-200"
           >
             Logout
           </button>
@@ -104,7 +104,7 @@ export default function DoctorDashboard() {
       <div className="max-w-6xl mx-auto px-6 py-8">
 
         {/* Heading */}
-        <h1 className="font-display text-4xl text-cream mb-1">
+        <h1 className="font-display text-4xl text-textMain mb-1">
           Good morning, {firstName}
         </h1>
         <p className="text-muted text-sm font-sans mb-8">Your clinic dashboard</p>
@@ -114,7 +114,7 @@ export default function DoctorDashboard() {
 
           {/* LEFT — Shared reports */}
           <div>
-            <h2 className="font-display text-2xl text-cream mb-4">Shared Reports</h2>
+            <h2 className="font-display text-2xl text-textMain mb-4">Shared Reports</h2>
 
             {mockPatients.length > 0 ? (
               <div className="flex flex-col gap-3">
@@ -138,18 +138,18 @@ export default function DoctorDashboard() {
 
           {/* RIGHT — Walk-in */}
           <div>
-            <h2 className="font-display text-2xl text-cream mb-4">Walk-in Session</h2>
+            <h2 className="font-display text-2xl text-textMain mb-4">Walk-in Session</h2>
 
             <div className="bg-surface border border-border rounded-card p-8 flex flex-col items-center text-center gap-4">
               <span className="text-5xl">🏥</span>
-              <h3 className="font-display text-2xl text-cream">Start a walk-in session</h3>
+              <h3 className="font-display text-2xl text-textMain">Start a walk-in session</h3>
               <p className="font-sans text-sm text-muted max-w-xs leading-relaxed">
                 Patient walked in without an appointment? Create a guest session and scan them
                 right here using your clinic device.
               </p>
               <button
                 onClick={() => navigate('/doctor/walkin')}
-                className="bg-turmeric text-bg font-sans font-medium text-sm px-8 py-3 rounded-full w-full max-w-xs hover:bg-sandalwood transition-all duration-300"
+                className="bg-primary text-bg font-sans font-medium text-sm px-8 py-3 rounded-full w-full max-w-xs hover:bg-accent transition-all duration-300"
               >
                 New Walk-in Session
               </button>
@@ -162,7 +162,7 @@ export default function DoctorDashboard() {
                   { value: '4',  label: 'Active patients'    },
                 ].map((s) => (
                   <div key={s.label} className="flex flex-col items-center gap-1">
-                    <span className="font-mono text-2xl text-cream">{s.value}</span>
+                    <span className="font-mono text-2xl text-textMain">{s.value}</span>
                     <span className="font-sans text-xs text-muted">{s.label}</span>
                   </div>
                 ))}
@@ -175,19 +175,19 @@ export default function DoctorDashboard() {
         <div className="flex gap-4 mt-8 flex-wrap">
           <button
             onClick={() => navigate('/doctor/messages')}
-            className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans hover:border-turmeric hover:text-cream transition-all duration-200"
+            className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans hover:border-primary hover:text-textMain transition-all duration-200"
           >
             Message Patients
           </button>
           <button
             onClick={() => navigate('/doctor/analytics')}
-            className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans hover:border-turmeric hover:text-cream transition-all duration-200"
+            className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans hover:border-primary hover:text-textMain transition-all duration-200"
           >
             View Analytics
           </button>
           <button
             onClick={showToast}
-            className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans hover:border-turmeric hover:text-cream transition-all duration-200"
+            className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans hover:border-primary hover:text-textMain transition-all duration-200"
           >
             Export Reports
           </button>

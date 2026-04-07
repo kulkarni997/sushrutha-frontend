@@ -58,13 +58,13 @@ export default function Signup() {
   }
 
   const inputClass =
-    'w-full bg-bg border border-border rounded-lg px-4 py-3 text-cream text-sm font-sans placeholder:text-hint focus:outline-none focus:border-turmeric focus:ring-1 focus:ring-turmeric transition-colors duration-200';
+    'w-full bg-bg border border-border rounded-lg px-4 py-3 text-textMain text-sm font-sans placeholder:text-hint focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-200';
   const labelClass =
     'block text-xs text-hint font-sans tracking-widest uppercase mb-1';
 
   return (
     <div
-      className="relative min-h-screen bg-bg text-cream font-sans flex flex-col overflow-hidden"
+      className="relative min-h-screen bg-bg text-textMain font-sans flex flex-col overflow-hidden"
       style={{
         backgroundImage:
           'url(https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=1920&q=80)',
@@ -81,13 +81,13 @@ export default function Signup() {
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(13, 11, 8, 0.60)' }} />
         <button
           onClick={() => navigate('/')}
-          className="relative font-display text-turmeric text-xl tracking-widest uppercase cursor-pointer"
+          className="relative font-display text-primary text-xl tracking-widest uppercase cursor-pointer"
         >
           Sushrutha AI
         </button>
         <button
           onClick={() => navigate('/role')}
-          className="relative text-muted hover:text-cream text-sm font-sans cursor-pointer transition-colors duration-200"
+          className="relative text-muted hover:text-textMain text-sm font-sans cursor-pointer transition-colors duration-200"
         >
           Back
         </button>
@@ -97,7 +97,7 @@ export default function Signup() {
       <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 pt-24 pb-16">
         <div className="bg-surface border border-border rounded-card p-8 w-full max-w-sm mx-auto">
 
-          <h1 className="font-display text-3xl text-cream font-normal mb-1">
+          <h1 className="font-display text-3xl text-textMain font-normal mb-1">
             Create your account
           </h1>
 
@@ -111,7 +111,7 @@ export default function Signup() {
             </span>
           ) : (
             <span
-              className="text-xs font-sans px-3 py-1 rounded-full mb-6 inline-block border text-sandalwood border-sandalwood"
+              className="text-xs font-sans px-3 py-1 rounded-full mb-6 inline-block border text-accent border-accent"
               style={{ backgroundColor: 'rgba(196, 132, 90, 0.2)' }}
             >
               ⚕ Signing up as BAMS Doctor
@@ -179,14 +179,14 @@ export default function Signup() {
 
             {/* Error */}
             {error && (
-              <p className="text-kumkum text-xs font-sans mt-1 mb-2">{error}</p>
+              <p className="text-error text-xs font-sans mt-1 mb-2">{error}</p>
             )}
 
             {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-turmeric text-bg font-sans font-medium text-sm py-3 rounded-full mt-2 hover:bg-sandalwood transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-primary text-bg font-sans font-medium text-sm py-3 rounded-full mt-2 hover:bg-accent transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
@@ -202,7 +202,7 @@ export default function Signup() {
             <p className="text-center font-sans text-sm text-muted">
               Already have an account?{' '}
               <span
-                className="text-turmeric hover:text-sandalwood cursor-pointer transition-colors duration-200"
+                className="text-primary hover:text-accent cursor-pointer transition-colors duration-200"
                 onClick={() => navigate('/login')}
               >
                 Sign in

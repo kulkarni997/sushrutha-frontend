@@ -21,11 +21,11 @@ export default function PlanGate({ feature, children, fallback, blur = false }) 
           style={{ background: 'rgba(13,11,8,0.85)' }}
         >
           <span className="text-2xl">🔒</span>
-          <p className="font-sans text-sm text-cream text-center mt-2">
+          <p className="font-sans text-sm text-textMain text-center mt-2">
             This feature requires an upgrade
           </p>
           <button
-            className="bg-turmeric text-bg font-sans text-xs px-6 py-2 rounded-full mt-3 cursor-pointer"
+            className="bg-primary text-bg font-sans text-xs px-6 py-2 rounded-full mt-3 cursor-pointer"
             onClick={() => navigate('/upgrade')}
           >
             Upgrade Plan
@@ -42,7 +42,7 @@ export default function PlanGate({ feature, children, fallback, blur = false }) 
         Feature not available on your current plan
       </p>
       <button
-        className="border border-turmeric text-turmeric font-sans text-xs px-6 py-2 rounded-full"
+        className="border border-primary text-primary font-sans text-xs px-6 py-2 rounded-full"
         onClick={() => navigate('/upgrade')}
       >
         See upgrade options
