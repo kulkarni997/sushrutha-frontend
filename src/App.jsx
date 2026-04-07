@@ -22,6 +22,7 @@ import DoctorAnalytics from './pages/doctor/DoctorAnalytics.jsx'
 
 import Messages from './pages/shared/Messages.jsx'
 import Notifications from './pages/shared/Notifications.jsx'
+import Upgrade from './pages/Upgrade.jsx'
 
 function PatientRoute({ children }) {
   const { user } = useAuth()
@@ -69,6 +70,7 @@ export default function App() {
         {/* Shared authenticated */}
         <Route path="/messages/:threadId" element={<AuthRoute><Messages /></AuthRoute>} />
         <Route path="/notifications" element={<AuthRoute><Notifications /></AuthRoute>} />
+        <Route path="/upgrade" element={<AuthRoute><Upgrade /></AuthRoute>} />
 
         {/* Fallback */}
         <Route path="/unauthorized" element={<Unauthorized />} />

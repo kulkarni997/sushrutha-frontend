@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
     if (token) {
       const decoded = decodeJWT(token)
       if (decoded && decoded.exp * 1000 > Date.now()) {
-        setUser({ id: decoded.id, role: decoded.role, name: decoded.name })
+        setUser({ id: decoded.sub, role: decoded.role, name: decoded.name, plan: decoded.plan || 'free' })
       } else {
         localStorage.removeItem('sushrutha_token')
       }
@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
   function login(token) {
     localStorage.setItem('sushrutha_token', token)
     const decoded = decodeJWT(token)
-    setUser({ id: decoded.id, role: decoded.role, name: decoded.name })
+    setUser({ id: decoded.sub, role: decoded.role, name: decoded.name, plan: decoded.plan || 'free' })
   }
 
   function logout() {
