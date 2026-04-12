@@ -1,143 +1,150 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-
-const mockThreads = [
-  {
-    id: 1,
-    name: 'Dr Kulkarni',
-    preview: 'Yes, avoid cold and dry foods...',
-    time: 'Today',
-    unread: true,
-  },
-  {
-    id: 2,
-    name: 'Dr Sharma',
-    preview: 'Please come for follow-up next...',
-    time: 'Yesterday',
-    unread: false,
-  },
-]
-
-const mockMessages = [
-  { id: 1, from: 'doctor',  text: 'Hello. I reviewed your report. Your Vata is quite elevated. Please start with Ashwagandha 500mg twice daily.', time: '10:05 AM' },
-  { id: 2, from: 'patient', text: 'Thank you doctor. Should I avoid any specific foods?', time: '10:08 AM' },
-  { id: 3, from: 'doctor',  text: 'Yes, avoid cold and dry foods. Prefer warm, oily, grounding foods like ghee and sesame.', time: '10:10 AM' },
-  { id: 4, from: 'patient', text: 'Thank you doctor, I will follow the advice carefully.', time: '10:15 AM' },
-  { id: 5, from: 'doctor',  text: 'Great. Please come back after 2 weeks and we can review your progress.', time: '10:20 AM' },
-]
+import Spinner from '../../components/Spinner'
+import api from '../../api/axios'
 
 export default function Messages() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { threadId } = useParams()
 
-  const [activeThread, setActiveThread] = useState(1)
-  const [message, setMessage] = useState('')
+  const [threads, setThreads] = useState([])
+  const [activeThread, setActiveThread] = useState(null)
+  const [messages, setMessages] = useState([])
+  const [body, setBody] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [sending, setSending] = useState(false)
+  const bottomRef = useRef(null)
 
-  function handleLogout() {
-    logout()
-    navigate('/')
+  useEffect(() => {
+    api.get('/messages')
+      .then(r => {
+        const t = r.data || []
+        setThreads(t)
+        if (threadId) {
+          const found = t.find(th => th.thread_id === threadId)
+          if (found) setActiveThread(found)
+        } else if (t.length > 0) {
+          setActiveThread(t[0])
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (!activeThread) return
+    api.get(`/messages/${activeThread.thread_id}`)
+      .then(r => setMessages(r.data || []))
+      .catch(console.error)
+  }, [activeThread])
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  async function handleSend() {
+    if (!body.trim() || !activeThread) return
+    setSending(true)
+    try {
+      const res = await api.post('/messages', {
+        receiver_id: activeThread.other_user_id,
+        scan_id: activeThread.scan_id,
+        body: body.trim()
+      })
+      setMessages(prev => [...prev, res.data])
+      setBody('')
+    } catch (e) { console.error(e) }
+    setSending(false)
   }
 
-  const active = mockThreads.find((t) => t.id === activeThread)
+  function handleLogout() { logout(); navigate('/') }
 
   return (
     <div className="min-h-screen bg-bg font-sans flex flex-col">
-
-      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 pt-6 pb-2 flex-shrink-0" style={{ height: '64px' }}>
         <span className="font-display text-primary text-xl tracking-widest">SUSHRUTHA AI</span>
         <div className="flex items-center gap-4">
           <span className="text-muted text-sm">{user?.name}</span>
-          <button
-            onClick={handleLogout}
-            className="text-hint text-xs hover:text-error transition-colors duration-200"
-          >
-            Logout
-          </button>
+          <button onClick={handleLogout} className="text-hint text-xs hover:text-error transition-colors duration-200">Logout</button>
         </div>
       </nav>
 
-      {/* Two-column layout */}
       <div className="flex h-[calc(100vh-64px)] overflow-hidden">
 
-        {/* LEFT — Thread list */}
+        {/* Thread list */}
         <div className="w-80 border-r border-border bg-surface flex flex-col overflow-y-auto flex-shrink-0">
           <div className="px-6 py-4 border-b border-border flex-shrink-0">
             <h2 className="font-display text-xl text-textMain">Messages</h2>
           </div>
-
-          {mockThreads.map((thread) => (
+          {loading ? (
+            <div className="flex justify-center py-8"><Spinner /></div>
+          ) : threads.length === 0 ? (
+            <p className="text-muted text-sm font-sans px-6 py-4">No conversations yet.</p>
+          ) : threads.map((thread) => (
             <div
-              key={thread.id}
-              onClick={() => setActiveThread(thread.id)}
+              key={thread.thread_id}
+              onClick={() => setActiveThread(thread)}
               className={`px-6 py-4 border-b border-border cursor-pointer hover:bg-bg transition-colors duration-150 ${
-                activeThread === thread.id
-                  ? 'bg-orange-50 border-l-2 border-primary'
-                  : ''
+                activeThread?.thread_id === thread.thread_id ? 'bg-orange-50 border-l-2 border-primary' : ''
               }`}
             >
               <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-sans text-sm font-medium text-textMain">{thread.name}</span>
-                  {thread.unread && (
-                    <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                  )}
-                </div>
-                <span className="text-xs text-hint">{thread.time}</span>
+                <span className="font-sans text-sm font-medium text-textMain">{thread.other_name || 'User'}</span>
               </div>
-              <p className="text-xs text-muted truncate">{thread.preview}</p>
+              <p className="text-xs text-muted truncate">{thread.last_message || 'No messages yet'}</p>
             </div>
           ))}
         </div>
 
-        {/* RIGHT — Active thread */}
+        {/* Chat area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-
-          {/* Thread header */}
-          <div className="px-6 py-4 bg-surface border-b border-border flex-shrink-0">
-            <h3 className="font-display text-xl text-textMain">{active?.name}</h3>
-            <p className="text-xs text-muted">Re: Your Ayurvedic scan · Vata dominant</p>
-          </div>
-
-          {/* Messages area */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4">
-            {mockMessages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex flex-col ${msg.from === 'patient' ? 'items-end' : 'items-start'}`}
-              >
-                <div
-                  className={`px-4 py-3 max-w-md rounded-xl ${
-                    msg.from === 'patient'
-                      ? 'bg-primary text-white rounded-tr-none'
-                      : 'bg-surfaceAlt text-textMain rounded-tl-none'
-                  }`}
-                >
-                  <p className="text-sm font-sans">{msg.text}</p>
-                </div>
-                <span className={`text-xs text-hint mt-1 ${msg.from === 'patient' ? 'text-right' : ''}`}>
-                  {msg.time}
-                </span>
+          {!activeThread ? (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-muted font-sans text-sm">Select a conversation</p>
+            </div>
+          ) : (
+            <>
+              <div className="px-6 py-4 bg-surface border-b border-border flex-shrink-0">
+                <h3 className="font-display text-xl text-textMain">{activeThread.other_name || 'User'}</h3>
               </div>
-            ))}
-          </div>
 
-          {/* Input area */}
-          <div className="px-6 py-4 bg-surface border-t border-border flex gap-3 flex-shrink-0">
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type a message..."
-              className="input flex-1 h-12 resize-none"
-            />
-            <button
-              onClick={() => setMessage('')}
-              className="btn-primary px-6"
-            >
-              Send
-            </button>
-          </div>
+              <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4">
+                {messages.map((msg) => {
+                  const isMine = msg.sender_id === user.id
+                  return (
+                    <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+                      <div className={`px-4 py-3 max-w-md rounded-xl ${isMine ? 'bg-primary text-white rounded-tr-none' : 'bg-surface text-textMain rounded-tl-none border border-border'}`}>
+                        <p className="text-sm font-sans">{msg.body}</p>
+                      </div>
+                      <span className="text-xs text-hint mt-1">
+                        {new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  )
+                })}
+                <div ref={bottomRef} />
+              </div>
+
+              <div className="px-6 py-4 bg-surface border-t border-border flex gap-3 flex-shrink-0">
+                <textarea
+                  value={body}
+                  onChange={e => setBody(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                  placeholder="Type a message..."
+                  className="flex-1 h-12 resize-none bg-bg border border-border rounded-card px-4 py-2 text-sm text-textMain font-sans focus:outline-none focus:border-primary"
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={sending || !body.trim()}
+                  className="bg-primary text-bg px-6 rounded-card font-sans text-sm disabled:opacity-50"
+                >
+                  {sending ? '...' : 'Send'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

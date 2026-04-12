@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { usePlan } from '../../hooks/usePlan'
 import SensorBanner from '../../components/SensorBanner'
 import Spinner from '../../components/Spinner'
+import api from '../../api/axios'
 
 const LOADING_MESSAGES = [
   'Analysing tongue coating...',
@@ -19,18 +20,8 @@ function StepIndicator({ step }) {
     <div className="flex items-center justify-center py-6">
       {[1, 2, 3, 4].map((n, i) => (
         <div key={n} className="flex items-center">
-          <div
-            className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-              n <= step ? 'bg-primary' : 'bg-border'
-            }`}
-          />
-          {i < 3 && (
-            <div
-              className={`w-10 h-px transition-colors duration-300 ${
-                n < step ? 'bg-primary' : 'bg-border'
-              }`}
-            />
-          )}
+          <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${n <= step ? 'bg-primary' : 'bg-border'}`} />
+          {i < 3 && <div className={`w-10 h-px transition-colors duration-300 ${n < step ? 'bg-primary' : 'bg-border'}`} />}
         </div>
       ))}
     </div>
@@ -43,9 +34,7 @@ function StepSymptoms({ symptoms, setSymptoms, onNext }) {
   return (
     <div className="flex flex-col w-full">
       <h1 className="font-display text-4xl text-textMain mb-2">How are you feeling?</h1>
-      <p className="font-sans text-sm text-muted mb-6">
-        Describe your symptoms in your own words.
-      </p>
+      <p className="font-sans text-sm text-muted mb-6">Describe your symptoms in your own words.</p>
       <textarea
         value={symptoms}
         onChange={(e) => setSymptoms(e.target.value.slice(0, 500))}
@@ -76,7 +65,6 @@ function StepCamera({ capturedImage, setCapturedImage, onNext }) {
   useEffect(() => {
     if (capturedImage) return
     let active = true
-
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: 'user' } })
       .then((stream) => {
@@ -88,7 +76,6 @@ function StepCamera({ capturedImage, setCapturedImage, onNext }) {
         }
       })
       .catch(() => setCameraError(true))
-
     return () => {
       active = false
       streamRef.current?.getTracks().forEach((t) => t.stop())
@@ -115,64 +102,27 @@ function StepCamera({ capturedImage, setCapturedImage, onNext }) {
   return (
     <div className="flex flex-col w-full">
       <h1 className="font-display text-4xl text-textMain mb-2">Take a tongue photo</h1>
-      <p className="font-sans text-sm text-muted mb-6">
-        Stick out your tongue in good lighting.
-      </p>
-
+      <p className="font-sans text-sm text-muted mb-6">Stick out your tongue in good lighting.</p>
       <div className="w-full max-w-sm mx-auto">
         {cameraError ? (
-          <p className="text-error text-sm text-center py-8">
-            Camera access denied. Please allow camera in browser settings.
-          </p>
+          <p className="text-error text-sm text-center py-8">Camera access denied. Please allow camera in browser settings.</p>
         ) : capturedImage ? (
           <>
-            <img
-              src={capturedImage}
-              alt="Captured tongue"
-              className="w-full rounded-card border border-border"
-            />
+            <img src={capturedImage} alt="Captured tongue" className="w-full rounded-card border border-border" />
             <div className="flex gap-3 justify-center mt-4">
-              <button
-                onClick={retake}
-                className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans"
-              >
-                Retake
-              </button>
-              <button
-                onClick={onNext}
-                className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans"
-              >
-                Looks good
-              </button>
+              <button onClick={retake} className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans">Retake</button>
+              <button onClick={onNext} className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans">Looks good</button>
             </div>
           </>
         ) : (
           <>
             <div className="relative w-full rounded-card border border-border overflow-hidden bg-surface aspect-[4/3] flex items-center justify-center">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className={`w-full h-full object-cover transition-opacity duration-300 ${
-                  cameraReady ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-              {!cameraReady && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Spinner />
-                </div>
-              )}
+              <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover transition-opacity duration-300 ${cameraReady ? 'opacity-100' : 'opacity-0'}`} />
+              {!cameraReady && <div className="absolute inset-0 flex items-center justify-center"><Spinner /></div>}
             </div>
             <canvas ref={canvasRef} className="hidden" />
             <div className="flex justify-center mt-4">
-              <button
-                onClick={capture}
-                disabled={!cameraReady}
-                className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Capture
-              </button>
+              <button onClick={capture} disabled={!cameraReady} className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans disabled:opacity-50 disabled:cursor-not-allowed">Capture</button>
             </div>
           </>
         )}
@@ -197,37 +147,25 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
       chunksRef.current = []
       const mr = new MediaRecorder(stream)
       mediaRecorderRef.current = mr
-
-      mr.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data)
-      }
+      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data) }
       mr.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
         setAudioBlob(blob)
         stream.getTracks().forEach((t) => t.stop())
       }
-
       mr.start()
       setRecording(true)
       setCountdown(10)
-
       let secs = 10
       timerRef.current = setInterval(() => {
         secs -= 1
         setCountdown(secs)
-        if (secs <= 0) {
-          clearInterval(timerRef.current)
-          mr.stop()
-          setRecording(false)
-        }
+        if (secs <= 0) { clearInterval(timerRef.current); mr.stop(); setRecording(false) }
       }, 1000)
     })
   }
 
-  function reRecord() {
-    setAudioBlob(null)
-    setCountdown(10)
-  }
+  function reRecord() { setAudioBlob(null); setCountdown(10) }
 
   const mins = String(Math.floor(countdown / 60)).padStart(1, '0')
   const secs = String(countdown % 60).padStart(2, '0')
@@ -235,28 +173,15 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
   return (
     <div className="flex flex-col w-full">
       <h1 className="font-display text-4xl text-textMain mb-2">Record your voice</h1>
-      <p className="font-sans text-sm text-muted mb-6">
-        Speak for 10 seconds in Kannada, Hindi, or English.
-      </p>
-
+      <p className="font-sans text-sm text-muted mb-6">Speak for 10 seconds in Kannada, Hindi, or English.</p>
       <div className="flex flex-col items-center gap-4">
         {audioBlob ? (
           <>
             <span className="text-5xl text-neem">✓</span>
             <p className="text-neem text-sm font-sans">Recording complete</p>
             <div className="flex gap-3">
-              <button
-                onClick={reRecord}
-                className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans"
-              >
-                Re-record
-              </button>
-              <button
-                onClick={onNext}
-                className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans"
-              >
-                Continue
-              </button>
+              <button onClick={reRecord} className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans">Re-record</button>
+              <button onClick={onNext} className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans">Continue</button>
             </div>
           </>
         ) : recording ? (
@@ -268,12 +193,7 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
         ) : (
           <>
             <span className="text-5xl text-muted">🎙</span>
-            <button
-              onClick={startRecording}
-              className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans"
-            >
-              Start Recording
-            </button>
+            <button onClick={startRecording} className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans">Start Recording</button>
           </>
         )}
       </div>
@@ -287,25 +207,11 @@ function StepSensor({ onChoose }) {
   return (
     <div className="flex flex-col w-full">
       <h1 className="font-display text-4xl text-textMain mb-2">Connect pulse sensor</h1>
-      <p className="font-sans text-sm text-muted mb-6">
-        Optional: pair your ESP32 pulse sensor for heart-rate data.
-      </p>
-
+      <p className="font-sans text-sm text-muted mb-6">Optional: pair your ESP32 pulse sensor for heart-rate data.</p>
       <SensorBanner />
-
       <div className="flex flex-col items-center gap-4 mt-6">
-        <button
-          onClick={() => onChoose(true)}
-          className="border border-neem text-neem rounded-full px-8 py-3 text-sm font-sans"
-        >
-          I have a sensor
-        </button>
-        <button
-          onClick={() => onChoose(false)}
-          className="text-muted text-sm font-sans underline cursor-pointer"
-        >
-          Skip for now
-        </button>
+        <button onClick={() => onChoose(true)} className="border border-neem text-neem rounded-full px-8 py-3 text-sm font-sans">I have a sensor</button>
+        <button onClick={() => onChoose(false)} className="text-muted text-sm font-sans underline cursor-pointer">Skip for now</button>
       </div>
     </div>
   )
@@ -335,83 +241,96 @@ export default function Scan() {
   const [audioBlob, setAudioBlob] = useState(null)
   const [diagnosing, setDiagnosing] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0])
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (!diagnosing) return
+  function handleLogout() { logout(); navigate('/') }
+
+  async function runDiagnosis(pulseUsed) {
+    setDiagnosing(true)
+    setError('')
+
+    // Cycle loading messages
     let idx = 0
     const interval = setInterval(() => {
       idx = (idx + 1) % LOADING_MESSAGES.length
       setLoadingMessage(LOADING_MESSAGES[idx])
-    }, 2000)
-    const timeout = setTimeout(() => {
+    }, 2500)
+
+    try {
+      // Step 1 — Create scan record
+      const scanRes = await api.post('/scans', {
+        symptoms_text: symptoms,
+        shared: false,
+      })
+      const scanId = scanRes.data.id
+
+      // Step 2 — Extract base64 from captured image (strip data URL prefix)
+      let imageData = null
+      if (capturedImage) {
+        imageData = capturedImage.replace(/^data:image\/\w+;base64,/, '')
+      }
+
+      // Step 3 — Convert audio blob to base64
+      let audioData = null
+      if (audioBlob) {
+        audioData = await new Promise((resolve) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result.replace(/^data:.+;base64,/, ''))
+          reader.readAsDataURL(audioBlob)
+        })
+      }
+
+      // Step 4 — Call /diagnose (runs vision + voice + SVM + RAG in parallel on backend)
+      const diagnoseRes = await api.post('/diagnose', {
+        scan_id: scanId,
+        symptoms_text: symptoms,
+        image_data: imageData,
+        audio_data: audioData,
+        pulse_used: pulseUsed,
+      })
+
       clearInterval(interval)
-      navigate('/results/mock-scan-id')
-    }, 3000)
-    return () => {
+
+      if (diagnoseRes.data.result_id) {
+        navigate(`/results/${scanId}`)
+      } else {
+        setError('Diagnosis completed but result could not be saved. Please try again.')
+        setDiagnosing(false)
+      }
+    } catch (e) {
       clearInterval(interval)
-      clearTimeout(timeout)
+      console.error('Diagnosis error:', e)
+      setError(e.response?.data?.detail || 'Something went wrong. Please try again.')
+      setDiagnosing(false)
     }
-  }, [diagnosing, navigate])
-
-  function handleLogout() {
-    logout()
-    navigate('/')
   }
 
-  function startDiagnosis() {
-    setDiagnosing(true)
-  }
-
-  if (diagnosing) {
-    return <DiagnosingScreen message={loadingMessage} />
-  }
+  if (diagnosing) return <DiagnosingScreen message={loadingMessage} />
 
   return (
     <div className="min-h-screen bg-bg text-textMain font-sans flex flex-col">
-      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 pt-6 pb-2 shrink-0">
         <span className="font-display text-primary text-xl tracking-widest">SUSHRUTHA AI</span>
         <div className="flex items-center gap-4">
           <span className="text-muted text-sm">{user?.name}</span>
-          <button
-            onClick={handleLogout}
-            className="text-hint text-xs hover:text-error transition-colors duration-200"
-          >
-            Logout
-          </button>
+          <button onClick={handleLogout} className="text-hint text-xs hover:text-error transition-colors duration-200">Logout</button>
         </div>
       </nav>
 
-      {/* Step indicator */}
       <StepIndicator step={step} />
 
-      {/* Content */}
+      {error && (
+        <div className="mx-6 mb-2 px-4 py-3 bg-surface border border-error rounded-card">
+          <p className="text-error text-sm font-sans">{error}</p>
+        </div>
+      )}
+
       <main className="flex flex-col items-center justify-center flex-1 px-6 py-8">
         <div className="max-w-2xl w-full">
-          {step === 1 && (
-            <StepSymptoms
-              symptoms={symptoms}
-              setSymptoms={setSymptoms}
-              onNext={() => setStep(2)}
-            />
-          )}
-          {step === 2 && (
-            <StepCamera
-              capturedImage={capturedImage}
-              setCapturedImage={setCapturedImage}
-              onNext={() => setStep(3)}
-            />
-          )}
-          {step === 3 && (
-            <StepVoice
-              audioBlob={audioBlob}
-              setAudioBlob={setAudioBlob}
-              onNext={() => setStep(4)}
-            />
-          )}
-          {step === 4 && (
-            <StepSensor onChoose={startDiagnosis} />
-          )}
+          {step === 1 && <StepSymptoms symptoms={symptoms} setSymptoms={setSymptoms} onNext={() => setStep(2)} />}
+          {step === 2 && <StepCamera capturedImage={capturedImage} setCapturedImage={setCapturedImage} onNext={() => setStep(3)} />}
+          {step === 3 && <StepVoice audioBlob={audioBlob} setAudioBlob={setAudioBlob} onNext={() => setStep(4)} />}
+          {step === 4 && <StepSensor onChoose={runDiagnosis} />}
         </div>
       </main>
     </div>
