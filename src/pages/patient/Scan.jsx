@@ -5,6 +5,7 @@ import { usePlan } from '../../hooks/usePlan'
 import SensorBanner from '../../components/SensorBanner'
 import Spinner from '../../components/Spinner'
 import api from '../../api/axios'
+import PulseChart from '../../components/PulseChart'
 
 const LOADING_MESSAGES = [
   'Analysing tongue coating...',
@@ -204,13 +205,31 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
 // ─── Step 4 — Sensor ──────────────────────────────────────────────────────────
 
 function StepSensor({ onChoose }) {
+  const [showChart, setShowChart] = useState(false)
+
+  if (showChart) {
+    return (
+      <div className="flex flex-col w-full">
+        <h1 className="font-display text-4xl text-textMain mb-2">Live pulse reading</h1>
+        <p className="font-sans text-sm text-muted mb-6">Place your finger on the sensor.</p>
+        <PulseChart />
+        <button
+          onClick={() => onChoose(true)}
+          className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans mt-6 self-center"
+        >
+          Continue with diagnosis
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col w-full">
       <h1 className="font-display text-4xl text-textMain mb-2">Connect pulse sensor</h1>
       <p className="font-sans text-sm text-muted mb-6">Optional: pair your ESP32 pulse sensor for heart-rate data.</p>
       <SensorBanner />
       <div className="flex flex-col items-center gap-4 mt-6">
-        <button onClick={() => onChoose(true)} className="border border-neem text-neem rounded-full px-8 py-3 text-sm font-sans">I have a sensor</button>
+        <button onClick={() => setShowChart(true)} className="border border-neem text-neem rounded-full px-8 py-3 text-sm font-sans">I have a sensor</button>
         <button onClick={() => onChoose(false)} className="text-muted text-sm font-sans underline cursor-pointer">Skip for now</button>
       </div>
     </div>
