@@ -20,6 +20,7 @@ import DoctorPatient from './pages/doctor/DoctorPatient.jsx'
 import DoctorMessages from './pages/doctor/DoctorMessages.jsx'
 import DoctorAnalytics from './pages/doctor/DoctorAnalytics.jsx'
 import WalkinIntake from './pages/doctor/WalkinIntake.jsx'
+import DoctorWalkinReview from './pages/doctor/DoctorWalkinReview.jsx'
 
 import Messages from './pages/shared/Messages.jsx'
 import Notifications from './pages/shared/Notifications.jsx'
@@ -68,6 +69,7 @@ export default function App() {
         <Route path="/doctor/messages" element={<DoctorRoute><DoctorMessages /></DoctorRoute>} />
         <Route path="/doctor/analytics" element={<DoctorRoute><DoctorAnalytics /></DoctorRoute>} />
         <Route path="/doctor/walkin/:id" element={<DoctorRoute><WalkinIntake /></DoctorRoute>} />
+        <Route path="/doctor/walkin/:id/review" element={<DoctorRoute><DoctorWalkinReview /></DoctorRoute>} />
         {/* Shared authenticated */}
         <Route path="/messages/:threadId" element={<AuthRoute><Messages /></AuthRoute>} />
         <Route path="/notifications" element={<AuthRoute><Notifications /></AuthRoute>} />

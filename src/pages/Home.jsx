@@ -118,6 +118,10 @@ export default function Home() {
           Get Started
         </button>
 
+        <p className="text-muted text-xs font-sans mb-6">
+  Free to try · Pro from ₹299/mo · For patients and BAMS doctors
+</p>
+
         {/* Feature pills */}
         <div className="flex flex-wrap items-center justify-center gap-3">
           {['Tongue Analysis', 'Voice Dosha', 'Pulse Screening'].map((label) => (

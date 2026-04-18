@@ -16,7 +16,7 @@ const LOADING_MESSAGES = [
 
 // ─── Step indicator ───────────────────────────────────────────────────────────
 
-function StepIndicator({ step }) {
+export function StepIndicator({ step }) {
   return (
     <div className="flex items-center justify-center py-6">
       {[1, 2, 3, 4].map((n, i) => (
@@ -31,7 +31,7 @@ function StepIndicator({ step }) {
 
 // ─── Step 1 — Symptoms ────────────────────────────────────────────────────────
 
-function StepSymptoms({ symptoms, setSymptoms, onNext }) {
+export function StepSymptoms({ symptoms, setSymptoms, onNext }) {
   return (
     <div className="flex flex-col w-full">
       <h1 className="font-display text-4xl text-textMain mb-2">How are you feeling?</h1>
@@ -56,7 +56,7 @@ function StepSymptoms({ symptoms, setSymptoms, onNext }) {
 
 // ─── Step 2 — Camera ──────────────────────────────────────────────────────────
 
-function StepCamera({ capturedImage, setCapturedImage, onNext }) {
+export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
@@ -134,7 +134,7 @@ function StepCamera({ capturedImage, setCapturedImage, onNext }) {
 
 // ─── Step 3 — Voice ───────────────────────────────────────────────────────────
 
-function StepVoice({ audioBlob, setAudioBlob, onNext }) {
+export function StepVoice({ audioBlob, setAudioBlob, onNext }) {
   const [recording, setRecording] = useState(false)
   const [countdown, setCountdown] = useState(10)
   const mediaRecorderRef = useRef(null)
@@ -204,7 +204,7 @@ function StepVoice({ audioBlob, setAudioBlob, onNext }) {
 
 // ─── Step 4 — Sensor ──────────────────────────────────────────────────────────
 
-function StepSensor({ onChoose }) {
+export function StepSensor({ onChoose }) {
   const [showChart, setShowChart] = useState(false)
 
   if (showChart) {
