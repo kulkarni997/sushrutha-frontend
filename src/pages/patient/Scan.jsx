@@ -235,7 +235,6 @@ function StepSensor({ onChoose }) {
     </div>
   )
 }
-
 // ─── Diagnosing screen ────────────────────────────────────────────────────────
 
 function DiagnosingScreen({ message }) {
