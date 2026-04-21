@@ -135,10 +135,9 @@ function PatientRow({ scan, navigate, done }) {
 }
 
 const NAV = [
-  { path:'/doctor/dashboard', icon:'⊞', label:'Dashboard' },
-  { path:'/doctor/analytics', icon:'◎', label:'Analytics' },
+  { path:'/doctor/dashboard', icon:'*', label:'Dashboard' },
+  { path:'/doctor/analytics', icon:'o', label:'Analytics' },
   { path:'/doctor/walkin',    icon:'+', label:'Walk-in'   },
-  { path:'/messages',         icon:'✉', label:'Messages'  },
 ]
 
 const s = {
