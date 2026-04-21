@@ -7,6 +7,8 @@ import {
   PointElement,
   LineElement,
   Filler,
+  Tooltip,
+  Legend,
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import { useAuth } from '../../hooks/useAuth'
@@ -15,46 +17,47 @@ import PlanGate from '../../components/PlanGate'
 import Spinner from '../../components/Spinner'
 import api from '../../api/axios'
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// --- Constants ---
 
 const SEVERITY_CONFIG = {
   mild: {
     bg: 'bg-neem/20', border: 'border-neem', text: 'text-neem',
-    label: '🌿 Mild imbalance detected — self-care recommended',
+    label: 'Mild imbalance detected - self-care recommended',
   },
   moderate: {
     bg: 'bg-primary/20', border: 'border-primary', text: 'text-primary',
-    label: '⚠ Moderate imbalance — consult a doctor alongside these tips',
+    label: 'Moderate imbalance - consult a doctor alongside these tips',
   },
   severe: {
     bg: 'bg-error/20', border: 'border-error', text: 'text-error',
-    label: '🔴 Significant imbalance — please consult a BAMS doctor immediately',
+    label: 'Significant imbalance - please consult a BAMS doctor immediately',
   },
 }
 
 const DOSHA_BAR_COLOR = { Vata: 'bg-primary', Pitta: 'bg-error', Kapha: 'bg-neem' }
+const DOSHA_HEX       = { Vata: '#E8A020',  Pitta: '#C0392B',  Kapha: '#4A7C59'   }
 
 const YOGA_BY_DOSHA = {
   Vata: [
-    { title: 'Grounding poses', desc: "Warrior I, Mountain pose, Child's pose — hold each for 5 slow breaths." },
-    { title: 'Oil massage (Abhyanga)', desc: 'Self-massage with warm sesame oil before bathing, 10–15 minutes daily.' },
+    { title: 'Grounding poses', desc: "Warrior I, Mountain pose, Child's pose - hold each for 5 slow breaths." },
+    { title: 'Oil massage (Abhyanga)', desc: 'Self-massage with warm sesame oil before bathing, 10-15 minutes daily.' },
     { title: 'Daily routine', desc: 'Sleep by 10 pm, wake by 6 am. Eat warm, oily, lightly spiced foods at regular times.' },
   ],
   Pitta: [
-    { title: 'Cooling poses', desc: 'Moon salutation, seated forward bend, cobra pose — avoid overheating.' },
-    { title: 'Cooling pranayama', desc: 'Sheetali breathing — curl tongue, inhale through mouth, exhale through nose.' },
+    { title: 'Cooling poses', desc: 'Moon salutation, seated forward bend, cobra pose - avoid overheating.' },
+    { title: 'Cooling pranayama', desc: 'Sheetali breathing - curl tongue, inhale through mouth, exhale through nose.' },
     { title: 'Diet', desc: 'Avoid spicy, sour, fermented foods. Favour sweet, bitter, astringent tastes.' },
   ],
   Kapha: [
-    { title: 'Energising poses', desc: 'Sun salutation, warrior II, camel pose — move briskly and dynamically.' },
-    { title: 'Kapalabhati breathing', desc: 'Rapid exhales through nose, 30 reps × 3 rounds every morning.' },
+    { title: 'Energising poses', desc: 'Sun salutation, warrior II, camel pose - move briskly and dynamically.' },
+    { title: 'Kapalabhati breathing', desc: 'Rapid exhales through nose, 30 reps x 3 rounds every morning.' },
     { title: 'Diet', desc: 'Avoid heavy, cold, oily foods. Favour light, dry, spicy, and warm foods.' },
   ],
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// --- Sub-components ---
 
 function SeverityBanner({ severity }) {
   const cfg = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.mild
@@ -66,67 +69,168 @@ function SeverityBanner({ severity }) {
 }
 
 function DoshaBar({ name, value, dominant }) {
+  // 0% bars: render a thin visible stripe so label doesn't float alone
+  const displayWidth = value === 0 ? 2 : value
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
           <span className="font-sans text-sm text-textMain">{name}</span>
           {dominant && (
-            <span className="bg-primary/20 text-primary font-sans text-xs px-2 py-0.5 rounded-full">Dominant</span>
+            <span className="bg-primary/20 text-primary font-sans text-xs px-2 py-0.5 rounded-full">
+              Dominant
+            </span>
           )}
         </div>
         <span className="font-mono text-sm text-muted">{value}%</span>
       </div>
-      <div className="w-full bg-bg rounded-full h-3 overflow-hidden">
-        <div className={`${DOSHA_BAR_COLOR[name]} h-3 rounded-full transition-all duration-700`} style={{ width: `${value}%` }} />
+      <div className="w-full bg-bg rounded-full h-3 overflow-hidden border border-border">
+        <div
+          className={`${DOSHA_BAR_COLOR[name]} h-full rounded-full transition-all duration-700`}
+          style={{ width: `${displayWidth}%`, minWidth: value === 0 ? '4px' : undefined }}
+        />
       </div>
     </div>
   )
 }
 
-function RecipeCard({ line }) {
-  const colonIdx = line.indexOf(':')
-  if (colonIdx === -1) return <div className="bg-surface border border-border rounded-card p-4"><p className="font-sans text-sm text-muted">{line}</p></div>
-  const herb = line.slice(0, colonIdx).trim()
-  const instruction = line.slice(colonIdx + 1).trim()
+// Parses Groq's markdown recipe output.
+// Handles: **Herbs**, **Yoga**, **Diet** headers + numbered/bulleted items below each.
+function parseRecipe(raw) {
+  if (!raw) return []
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean)
+  const sections = []
+  let current = null
+
+  for (const line of lines) {
+    // Section header: **Herbs**, **Yoga**, **Diet**, etc.
+    const headerMatch = line.match(/^\*\*(.+?)\*\*\s*:?\s*$/)
+    if (headerMatch) {
+      current = { title: headerMatch[1].trim(), items: [] }
+      sections.push(current)
+      continue
+    }
+    // Numbered/bulleted item: "1. ...", "- ...", "* ..."
+    const itemMatch = line.match(/^(?:\d+\.|[-*])\s*(.+)$/)
+    const body = itemMatch ? itemMatch[1] : line
+    // Strip inline markdown bold: **Bala** -> Bala
+    const clean = body.replace(/\*\*(.+?)\*\*/g, '$1')
+    if (current) current.items.push(clean)
+    else sections.push({ title: '', items: [clean] })
+  }
+
+  // Fallback: if no sections parsed, treat each line as a loose item
+  if (sections.length === 0 || sections.every(s => s.items.length === 0)) {
+    return [{ title: '', items: lines }]
+  }
+  return sections
+}
+
+function RecipeSection({ section }) {
   return (
     <div className="bg-surface border border-border rounded-card p-4">
-      <p className="font-sans text-sm font-semibold text-primary mb-1">{herb}</p>
-      <p className="font-sans text-sm text-muted">{instruction}</p>
+      {section.title && (
+        <p className="font-sans text-sm font-semibold text-primary mb-2">{section.title}</p>
+      )}
+      <ul className="flex flex-col gap-1.5">
+        {section.items.map((item, i) => (
+          <li key={i} className="font-sans text-sm text-muted leading-relaxed">
+            {item}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
 
 function ForecastChart({ forecast }) {
+  const labels = forecast.map((d) => `D${d.day}`)
   const data = {
-    labels: forecast.map((d) => `Day ${d.day}`),
-    datasets: [{
-      data: forecast.map((d) => d.healing_score),
-      borderColor: '#E8A020',
-      backgroundColor: 'rgba(232,160,32,0.08)',
-      borderWidth: 2,
-      pointBackgroundColor: '#E8A020',
-      pointRadius: 4,
-      tension: 0.35,
-      fill: true,
-    }],
+    labels,
+    datasets: [
+      {
+        label: 'Vata',
+        data: forecast.map((d) => d.vata),
+        borderColor: DOSHA_HEX.Vata,
+        backgroundColor: 'rgba(232,160,32,0.05)',
+        borderWidth: 2,
+        pointRadius: 3,
+        tension: 0.35,
+      },
+      {
+        label: 'Pitta',
+        data: forecast.map((d) => d.pitta),
+        borderColor: DOSHA_HEX.Pitta,
+        backgroundColor: 'rgba(192,57,43,0.05)',
+        borderWidth: 2,
+        pointRadius: 3,
+        tension: 0.35,
+      },
+      {
+        label: 'Kapha',
+        data: forecast.map((d) => d.kapha),
+        borderColor: DOSHA_HEX.Kapha,
+        backgroundColor: 'rgba(74,124,89,0.05)',
+        borderWidth: 2,
+        pointRadius: 3,
+        tension: 0.35,
+      },
+    ],
   }
   const options = {
     responsive: true,
-    plugins: { legend: { display: false } },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+        labels: { color: '#A89880', font: { family: 'DM Sans', size: 12 }, boxWidth: 12 },
+      },
+      tooltip: {
+        callbacks: {
+          title: (items) => {
+            const d = forecast[items[0].dataIndex]
+            return `Day ${d.day} (${d.date})`
+          },
+          afterBody: (items) => {
+            const d = forecast[items[0].dataIndex]
+            return [`Healing score: ${d.healing_score}`]
+          },
+        },
+      },
+    },
     scales: {
-      x: { ticks: { color: '#A89880', font: { family: 'DM Sans', size: 11 } }, grid: { color: '#2E2820' }, border: { color: '#2E2820' } },
-      y: { min: 0, max: 100, ticks: { color: '#A89880', font: { family: 'DM Sans', size: 11 } }, grid: { color: '#2E2820' }, border: { color: '#2E2820' } },
+      x: {
+        ticks: { color: '#A89880', font: { family: 'DM Sans', size: 11 } },
+        grid:  { color: '#2E2820' },
+        border:{ color: '#2E2820' },
+      },
+      y: {
+        min: 0, max: 100,
+        ticks: { color: '#A89880', font: { family: 'DM Sans', size: 11 }, callback: (v) => `${v}%` },
+        grid:  { color: '#2E2820' },
+        border:{ color: '#2E2820' },
+      },
     },
   }
+  const healingStart = forecast[0]?.healing_score ?? 0
+  const healingEnd   = forecast[forecast.length - 1]?.healing_score ?? 0
+  const delta        = healingEnd - healingStart
+
   return (
     <div className="bg-surface border border-border rounded-card p-4">
       <Line data={data} options={options} />
+      <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs font-sans">
+        <span className="text-muted">14-day trajectory toward balance</span>
+        <span className={delta >= 0 ? 'text-neem' : 'text-error'}>
+          Healing score: {healingStart} {delta >= 0 ? '->' : '->'} {healingEnd}
+          {delta >= 0 ? ` (+${delta.toFixed(1)})` : ` (${delta.toFixed(1)})`}
+        </span>
+      </div>
     </div>
   )
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// --- Main page ---
 
 export default function Results() {
   const navigate = useNavigate()
@@ -134,18 +238,17 @@ export default function Results() {
   const { user, logout } = useAuth()
   const { hasFeature } = usePlan()
 
-  const [result, setResult] = useState(null)
-  const [forecast, setForecast] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [sharing, setSharing] = useState(false)
+  const [result, setResult]             = useState(null)
+  const [forecast, setForecast]         = useState(null)
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState('')
+  const [sharing, setSharing]           = useState(false)
   const [shareSuccess, setShareSuccess] = useState(false)
-  const [doctorId, setDoctorId] = useState('')
+  const [doctorId, setDoctorId]         = useState('')
 
   useEffect(() => {
     if (!scanId) return
 
-    // Fetch scan + result
     api.get(`/scans/${scanId}`)
       .then(r => {
         const scanData = r.data
@@ -153,7 +256,6 @@ export default function Results() {
         if (!res) { setError('No diagnosis result found.'); setLoading(false); return }
         setResult({ ...res, symptoms_text: scanData.symptoms_text })
 
-        // Fetch forecast only if not severe and plan allows
         if (res.severity !== 'severe' && hasFeature('forecast')) {
           return api.get(`/forecast/${scanId}`)
         }
@@ -186,7 +288,9 @@ export default function Results() {
   if (error) return (
     <div className="min-h-screen bg-bg flex flex-col items-center justify-center gap-4">
       <p className="text-error font-sans text-sm">{error}</p>
-      <button onClick={() => navigate('/scan')} className="bg-primary text-bg rounded-full px-6 py-2 text-sm font-sans">Try Again</button>
+      <button onClick={() => navigate('/scan')} className="bg-primary text-bg rounded-full px-6 py-2 text-sm font-sans">
+        Try Again
+      </button>
     </div>
   )
 
@@ -196,17 +300,21 @@ export default function Results() {
        { Vata: result.vata_pct, Pitta: result.pitta_pct, Kapha: result.kapha_pct }[b] ? a : b)
     ))
 
-  const recipeLines = (result.recipe_text || '').split('\n').filter(Boolean)
-  const yogaTips = YOGA_BY_DOSHA[dominant] || YOGA_BY_DOSHA.Vata
-  const isSevere = result.severity === 'severe'
+  const recipeSections = parseRecipe(result.recipe_text)
+  const yogaTips       = YOGA_BY_DOSHA[dominant] || YOGA_BY_DOSHA.Vata
+  const isSevere       = result.severity === 'severe'
 
   return (
     <div className="min-h-screen bg-bg text-textMain font-sans">
       <nav className="flex items-center justify-between px-6 pt-6 pb-2">
-        <button onClick={() => navigate('/')} className="font-display text-primary text-xl tracking-widest">SUSHRUTHA AI</button>
+        <button onClick={() => navigate('/')} className="font-display text-primary text-xl tracking-widest">
+          SUSHRUTHA AI
+        </button>
         <div className="flex items-center gap-4">
           <span className="text-muted text-sm">{user?.name}</span>
-          <button onClick={handleLogout} className="text-hint text-xs hover:text-error transition-colors duration-200">Logout</button>
+          <button onClick={handleLogout} className="text-hint text-xs hover:text-error transition-colors duration-200">
+            Logout
+          </button>
         </div>
       </nav>
 
@@ -219,26 +327,30 @@ export default function Results() {
         <section>
           <h2 className="font-display text-3xl text-textMain mb-6">Your Dosha Profile</h2>
           <div className="bg-surface border border-border rounded-card p-6">
-            <DoshaBar name="Vata" value={result.vata_pct} dominant={dominant === 'Vata'} />
+            <DoshaBar name="Vata"  value={result.vata_pct}  dominant={dominant === 'Vata'} />
             <DoshaBar name="Pitta" value={result.pitta_pct} dominant={dominant === 'Pitta'} />
             <DoshaBar name="Kapha" value={result.kapha_pct} dominant={dominant === 'Kapha'} />
             {result.pulse_used && (
-              <p className="font-sans text-xs text-neem mt-4">✓ Pulse sensor data included in this diagnosis</p>
+              <p className="font-sans text-xs text-neem mt-4">
+                Pulse sensor data included in this diagnosis
+              </p>
             )}
             {result.override_dosha && (
-              <p className="font-sans text-xs text-primary mt-2">Doctor override applied: {result.override_dosha}</p>
+              <p className="font-sans text-xs text-primary mt-2">
+                Doctor override applied: {result.override_dosha}
+              </p>
             )}
           </div>
         </section>
 
-        {/* 3. Recipe — gated, hidden for severe */}
+        {/* 3. Recipe */}
         {!isSevere && (
           <section>
             <h2 className="font-display text-2xl text-textMain mb-4">Your Ayurvedic Recipe</h2>
             <PlanGate feature="full_recipe" blur>
               <div className="flex flex-col gap-3">
-                {recipeLines.length > 0
-                  ? recipeLines.map((line, i) => <RecipeCard key={i} line={line} />)
+                {recipeSections.length > 0 && recipeSections.some(s => s.items.length > 0)
+                  ? recipeSections.map((section, i) => <RecipeSection key={i} section={section} />)
                   : <p className="text-muted text-sm font-sans">Recipe not available.</p>
                 }
               </div>
@@ -246,7 +358,7 @@ export default function Results() {
           </section>
         )}
 
-        {/* 4. Yoga — always shown if not severe */}
+        {/* 4. Yoga */}
         {!isSevere && (
           <section>
             <h2 className="font-display text-2xl text-textMain mb-4">Recommended Practices</h2>
@@ -261,7 +373,7 @@ export default function Results() {
           </section>
         )}
 
-        {/* 5. Doctor notes (if finalised) */}
+        {/* 5. Doctor notes */}
         {result.finalised && result.doctor_notes && (
           <section>
             <h2 className="font-display text-2xl text-textMain mb-4">Doctor Notes</h2>
@@ -271,7 +383,7 @@ export default function Results() {
           </section>
         )}
 
-        {/* 6. Forecast — gated */}
+        {/* 6. Forecast */}
         {!isSevere && (
           <section>
             <h2 className="font-display text-2xl text-textMain mb-4">14-Day Healing Forecast</h2>
@@ -289,10 +401,14 @@ export default function Results() {
           <h2 className="font-display text-2xl text-textMain mb-4">Find a BAMS Doctor</h2>
           <div className="bg-surface border border-border rounded-card p-6 flex flex-col gap-4">
             {isSevere && (
-              <p className="text-error font-sans text-sm">Your imbalance is severe. Please consult a BAMS doctor immediately.</p>
+              <p className="text-error font-sans text-sm">
+                Your imbalance is severe. Please consult a BAMS doctor immediately.
+              </p>
             )}
             {shareSuccess ? (
-              <p className="text-neem font-sans text-sm">✓ Report shared successfully. The doctor will be notified.</p>
+              <p className="text-neem font-sans text-sm">
+                Report shared successfully. The doctor will be notified.
+              </p>
             ) : (
               <>
                 <p className="font-sans text-sm text-muted">Enter a doctor's ID to share your report with them.</p>
