@@ -6,7 +6,7 @@ const PLAN_FEATURES = {
       max_scans: 2,
       pulse: false,
       forecast: true,
-      full_recipe: false,
+      full_recipe: true,
       history: false,
       pdf_export: false,
       messaging: true,
