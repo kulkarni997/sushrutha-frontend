@@ -5,7 +5,7 @@ const PLAN_FEATURES = {
     free: {
       max_scans: 2,
       pulse: false,
-      forecast: false,
+      forecast: true,
       full_recipe: false,
       history: false,
       pdf_export: false,

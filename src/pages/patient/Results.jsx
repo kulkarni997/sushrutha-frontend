@@ -256,7 +256,7 @@ export default function Results() {
         if (!res) { setError('No diagnosis result found.'); setLoading(false); return }
         setResult({ ...res, symptoms_text: scanData.symptoms_text })
 
-        if (res.severity !== 'severe' && hasFeature('forecast')) {
+        if (res.severity !== 'severe') {
           return api.get(`/forecast/${scanId}`)
         }
       })
