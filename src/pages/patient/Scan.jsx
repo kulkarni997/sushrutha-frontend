@@ -62,6 +62,7 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
   const streamRef = useRef(null)
   const [cameraError, setCameraError] = useState(false)
   const [cameraReady, setCameraReady] = useState(false)
+  const [lowLight, setLowLight] = useState(false)
 
   useEffect(() => {
     if (capturedImage) return
@@ -83,6 +84,18 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
     }
   }, [capturedImage])
 
+  function checkBrightness(canvas) {
+    const ctx = canvas.getContext('2d')
+    const { width, height } = canvas
+    const imageData = ctx.getImageData(width / 4, height / 4, width / 2, height / 2)
+    const data = imageData.data
+    let total = 0
+    for (let i = 0; i < data.length; i += 4) {
+      total += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+    }
+    return total / (data.length / 4)
+  }
+
   function capture() {
     const video = videoRef.current
     const canvas = canvasRef.current
@@ -90,6 +103,14 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
     canvas.getContext('2d').drawImage(video, 0, 0)
+
+    const brightness = checkBrightness(canvas)
+    if (brightness < 60) {
+      setLowLight(true)
+      return
+    }
+
+    setLowLight(false)
     const base64 = canvas.toDataURL('image/jpeg', 0.85)
     streamRef.current?.getTracks().forEach((t) => t.stop())
     setCapturedImage(base64)
@@ -98,12 +119,21 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
   function retake() {
     setCapturedImage(null)
     setCameraReady(false)
+    setLowLight(false)
   }
 
   return (
     <div className="flex flex-col w-full">
       <h1 className="font-display text-4xl text-textMain mb-2">Take a tongue photo</h1>
       <p className="font-sans text-sm text-muted mb-6">Stick out your tongue in good lighting.</p>
+
+      {lowLight && (
+        <div className="mb-4 px-4 py-3 bg-surface border border-primary rounded-card flex items-center gap-2">
+          <span className="text-lg">☀️</span>
+          <p className="text-primary text-sm font-sans">Not enough light — move to a brighter area and retake.</p>
+        </div>
+      )}
+
       <div className="w-full max-w-sm mx-auto">
         {cameraError ? (
           <p className="text-error text-sm text-center py-8">Camera access denied. Please allow camera in browser settings.</p>
@@ -235,6 +265,7 @@ export function StepSensor({ onChoose }) {
     </div>
   )
 }
+
 // ─── Diagnosing screen ────────────────────────────────────────────────────────
 
 function DiagnosingScreen({ message }) {
@@ -267,7 +298,6 @@ export default function Scan() {
     setDiagnosing(true)
     setError('')
 
-    // Cycle loading messages
     let idx = 0
     const interval = setInterval(() => {
       idx = (idx + 1) % LOADING_MESSAGES.length
@@ -275,20 +305,17 @@ export default function Scan() {
     }, 2500)
 
     try {
-      // Step 1 — Create scan record
       const scanRes = await api.post('/scans', {
         symptoms_text: symptoms,
         shared: false,
       })
       const scanId = scanRes.data.id
 
-      // Step 2 — Extract base64 from captured image (strip data URL prefix)
       let imageData = null
       if (capturedImage) {
         imageData = capturedImage.replace(/^data:image\/\w+;base64,/, '')
       }
 
-      // Step 3 — Convert audio blob to base64
       let audioData = null
       if (audioBlob) {
         audioData = await new Promise((resolve) => {
@@ -298,7 +325,6 @@ export default function Scan() {
         })
       }
 
-      // Step 4 — Call /diagnose (runs vision + voice + SVM + RAG in parallel on backend)
       const diagnoseRes = await api.post('/diagnose', {
         scan_id: scanId,
         symptoms_text: symptoms,
