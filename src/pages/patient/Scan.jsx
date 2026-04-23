@@ -60,12 +60,14 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
+  const fileInputRef = useRef(null)
   const [cameraError, setCameraError] = useState(false)
   const [cameraReady, setCameraReady] = useState(false)
   const [lowLight, setLowLight] = useState(false)
+  const [mode, setMode] = useState('camera') // 'camera' or 'upload'
 
   useEffect(() => {
-    if (capturedImage) return
+    if (capturedImage || mode === 'upload') return
     let active = true
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: 'user' } })
@@ -82,7 +84,7 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
       active = false
       streamRef.current?.getTracks().forEach((t) => t.stop())
     }
-  }, [capturedImage])
+  }, [capturedImage, mode])
 
   function checkBrightness(canvas) {
     const ctx = canvas.getContext('2d')
@@ -116,10 +118,29 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
     setCapturedImage(base64)
   }
 
+  function handleUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = () => setCapturedImage(reader.result)
+    reader.readAsDataURL(file)
+  }
+
   function retake() {
     setCapturedImage(null)
     setCameraReady(false)
     setLowLight(false)
+    if (mode === 'upload' && fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  function switchMode(m) {
+    streamRef.current?.getTracks().forEach((t) => t.stop())
+    setCapturedImage(null)
+    setCameraReady(false)
+    setLowLight(false)
+    setMode(m)
   }
 
   return (
@@ -139,6 +160,24 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
         </div>
       </div>
 
+      {/* Mode toggle */}
+      {!capturedImage && (
+        <div className="flex gap-2 mb-4 self-center">
+          <button
+            onClick={() => switchMode('camera')}
+            className={`px-5 py-2 rounded-full text-sm font-sans transition-colors duration-200 ${mode === 'camera' ? 'bg-primary text-bg' : 'border border-border text-muted'}`}
+          >
+            📷 Camera
+          </button>
+          <button
+            onClick={() => switchMode('upload')}
+            className={`px-5 py-2 rounded-full text-sm font-sans transition-colors duration-200 ${mode === 'upload' ? 'bg-primary text-bg' : 'border border-border text-muted'}`}
+          >
+            🖼️ Upload Photo
+          </button>
+        </div>
+      )}
+
       {lowLight && (
         <div className="mb-4 px-4 py-3 bg-surface border border-primary rounded-card flex items-center gap-2">
           <span className="text-lg">☀️</span>
@@ -147,62 +186,82 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
       )}
 
       <div className="w-full max-w-sm mx-auto">
-        {cameraError ? (
-          <p className="text-error text-sm text-center py-8">Camera access denied. Please allow camera in browser settings.</p>
-        ) : capturedImage ? (
+        {capturedImage ? (
           <>
-            <img src={capturedImage} alt="Captured tongue" className="w-full rounded-card border border-border" />
+            <img src={capturedImage} alt="Tongue" className="w-full rounded-card border border-border" />
             <div className="flex gap-3 justify-center mt-4">
               <button onClick={retake} className="border border-border text-muted rounded-full px-6 py-2 text-sm font-sans">Retake</button>
               <button onClick={onNext} className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans">Looks good</button>
             </div>
           </>
+        ) : mode === 'upload' ? (
+          <div
+            className="w-full rounded-card border-2 border-dashed border-border bg-surface aspect-[4/3] flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-primary transition-colors duration-200"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <span className="text-4xl">🖼️</span>
+            <p className="font-sans text-sm text-muted">Tap to select a tongue photo</p>
+            <p className="font-sans text-xs text-hint">JPG, PNG supported</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleUpload}
+            />
+          </div>
         ) : (
           <>
-            <div className="relative w-full rounded-card border border-border overflow-hidden bg-surface aspect-[4/3] flex items-center justify-center">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className={`w-full h-full object-cover transition-opacity duration-300 ${cameraReady ? 'opacity-100' : 'opacity-0'}`}
-              />
-              {!cameraReady && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Spinner />
-                </div>
-              )}
-              {cameraReady && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <div
-                    style={{
-                      width: '55%',
-                      paddingBottom: '35%',
-                      borderRadius: '50%',
-                      border: '3px solid #E8A020',
-                      boxShadow: '0 0 0 9999px rgba(13,11,8,0.45)',
-                      position: 'relative',
-                    }}
+            {cameraError ? (
+              <p className="text-error text-sm text-center py-8">Camera access denied. Please allow camera in browser settings.</p>
+            ) : (
+              <>
+                <div className="relative w-full rounded-card border border-border overflow-hidden bg-surface aspect-[4/3] flex items-center justify-center">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className={`w-full h-full object-cover transition-opacity duration-300 ${cameraReady ? 'opacity-100' : 'opacity-0'}`}
                   />
-                  <p
-                    className="font-sans text-xs text-primary"
-                    style={{ background: 'rgba(13,11,8,0.6)', marginTop: '10px', padding: '2px 10px', borderRadius: '999px' }}
-                  >
-                    Place tongue inside the oval
-                  </p>
+                  {!cameraReady && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Spinner />
+                    </div>
+                  )}
+                  {cameraReady && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <div
+                        style={{
+                          width: '55%',
+                          paddingBottom: '35%',
+                          borderRadius: '50%',
+                          border: '3px solid #E8A020',
+                          boxShadow: '0 0 0 9999px rgba(13,11,8,0.45)',
+                          position: 'relative',
+                        }}
+                      />
+                      <p
+                        className="font-sans text-xs text-primary"
+                        style={{ background: 'rgba(13,11,8,0.6)', marginTop: '10px', padding: '2px 10px', borderRadius: '999px' }}
+                      >
+                        Place tongue inside the oval
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <canvas ref={canvasRef} className="hidden" />
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={capture}
-                disabled={!cameraReady}
-                className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Capture
-              </button>
-            </div>
+                <canvas ref={canvasRef} className="hidden" />
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={capture}
+                    disabled={!cameraReady}
+                    className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Capture
+                  </button>
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
