@@ -125,7 +125,19 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
   return (
     <div className="flex flex-col w-full">
       <h1 className="font-display text-4xl text-textMain mb-2">Take a tongue photo</h1>
-      <p className="font-sans text-sm text-muted mb-6">Stick out your tongue in good lighting.</p>
+
+      <div className="flex flex-col gap-1 mb-4">
+        <p className="font-sans text-sm text-muted">Follow these steps for accurate results:</p>
+        <div className="flex flex-col gap-1 mt-1">
+          {[
+            '1. Sit in bright natural or white light',
+            '2. Open your mouth wide and stick out your tongue fully',
+            '3. Hold still and tap Capture',
+          ].map((tip) => (
+            <p key={tip} className="font-sans text-xs text-hint">{tip}</p>
+          ))}
+        </div>
+      </div>
 
       {lowLight && (
         <div className="mb-4 px-4 py-3 bg-surface border border-primary rounded-card flex items-center gap-2">
@@ -148,12 +160,48 @@ export function StepCamera({ capturedImage, setCapturedImage, onNext }) {
         ) : (
           <>
             <div className="relative w-full rounded-card border border-border overflow-hidden bg-surface aspect-[4/3] flex items-center justify-center">
-              <video ref={videoRef} autoPlay playsInline muted className={`w-full h-full object-cover transition-opacity duration-300 ${cameraReady ? 'opacity-100' : 'opacity-0'}`} />
-              {!cameraReady && <div className="absolute inset-0 flex items-center justify-center"><Spinner /></div>}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`w-full h-full object-cover transition-opacity duration-300 ${cameraReady ? 'opacity-100' : 'opacity-0'}`}
+              />
+              {!cameraReady && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Spinner />
+                </div>
+              )}
+              {cameraReady && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <div
+                    style={{
+                      width: '55%',
+                      paddingBottom: '35%',
+                      borderRadius: '50%',
+                      border: '3px solid #E8A020',
+                      boxShadow: '0 0 0 9999px rgba(13,11,8,0.45)',
+                      position: 'relative',
+                    }}
+                  />
+                  <p
+                    className="font-sans text-xs text-primary"
+                    style={{ background: 'rgba(13,11,8,0.6)', marginTop: '10px', padding: '2px 10px', borderRadius: '999px' }}
+                  >
+                    Place tongue inside the oval
+                  </p>
+                </div>
+              )}
             </div>
             <canvas ref={canvasRef} className="hidden" />
             <div className="flex justify-center mt-4">
-              <button onClick={capture} disabled={!cameraReady} className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans disabled:opacity-50 disabled:cursor-not-allowed">Capture</button>
+              <button
+                onClick={capture}
+                disabled={!cameraReady}
+                className="bg-primary text-bg rounded-full px-8 py-3 text-sm font-sans disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Capture
+              </button>
             </div>
           </>
         )}
