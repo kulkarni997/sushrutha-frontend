@@ -11,6 +11,9 @@ import {
   Legend,
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 import { useAuth } from '../../hooks/useAuth'
 import { usePlan } from '../../hooks/usePlan'
 import PlanGate from '../../components/PlanGate'
@@ -18,6 +21,14 @@ import Spinner from '../../components/Spinner'
 import api from '../../api/axios'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
+
+// Fix leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+})
 
 // --- Constants ---
 
@@ -69,7 +80,6 @@ function SeverityBanner({ severity }) {
 }
 
 function DoshaBar({ name, value, dominant }) {
-  // 0% bars: render a thin visible stripe so label doesn't float alone
   const displayWidth = value === 0 ? 2 : value
   return (
     <div className="mb-4">
@@ -94,8 +104,6 @@ function DoshaBar({ name, value, dominant }) {
   )
 }
 
-// Parses Groq's markdown recipe output.
-// Handles: **Herbs**, **Yoga**, **Diet** headers + numbered/bulleted items below each.
 function parseRecipe(raw) {
   if (!raw) return []
   const lines = raw.split('\n').map(l => l.trim()).filter(Boolean)
@@ -103,23 +111,19 @@ function parseRecipe(raw) {
   let current = null
 
   for (const line of lines) {
-    // Section header: **Herbs**, **Yoga**, **Diet**, etc.
     const headerMatch = line.match(/^\*\*(.+?)\*\*\s*:?\s*$/)
     if (headerMatch) {
       current = { title: headerMatch[1].trim(), items: [] }
       sections.push(current)
       continue
     }
-    // Numbered/bulleted item: "1. ...", "- ...", "* ..."
     const itemMatch = line.match(/^(?:\d+\.|[-*])\s*(.+)$/)
     const body = itemMatch ? itemMatch[1] : line
-    // Strip inline markdown bold: **Bala** -> Bala
     const clean = body.replace(/\*\*(.+?)\*\*/g, '$1')
     if (current) current.items.push(clean)
     else sections.push({ title: '', items: [clean] })
   }
 
-  // Fallback: if no sections parsed, treat each line as a loose item
   if (sections.length === 0 || sections.every(s => s.items.length === 0)) {
     return [{ title: '', items: lines }]
   }
@@ -153,27 +157,21 @@ function ForecastChart({ forecast }) {
         data: forecast.map((d) => d.vata),
         borderColor: DOSHA_HEX.Vata,
         backgroundColor: 'rgba(232,160,32,0.05)',
-        borderWidth: 2,
-        pointRadius: 3,
-        tension: 0.35,
+        borderWidth: 2, pointRadius: 3, tension: 0.35,
       },
       {
         label: 'Pitta',
         data: forecast.map((d) => d.pitta),
         borderColor: DOSHA_HEX.Pitta,
         backgroundColor: 'rgba(192,57,43,0.05)',
-        borderWidth: 2,
-        pointRadius: 3,
-        tension: 0.35,
+        borderWidth: 2, pointRadius: 3, tension: 0.35,
       },
       {
         label: 'Kapha',
         data: forecast.map((d) => d.kapha),
         borderColor: DOSHA_HEX.Kapha,
         backgroundColor: 'rgba(74,124,89,0.05)',
-        borderWidth: 2,
-        pointRadius: 3,
-        tension: 0.35,
+        borderWidth: 2, pointRadius: 3, tension: 0.35,
       },
     ],
   }
@@ -181,34 +179,25 @@ function ForecastChart({ forecast }) {
     responsive: true,
     plugins: {
       legend: {
-        display: true,
-        position: 'top',
+        display: true, position: 'top',
         labels: { color: '#A89880', font: { family: 'DM Sans', size: 12 }, boxWidth: 12 },
       },
       tooltip: {
         callbacks: {
-          title: (items) => {
-            const d = forecast[items[0].dataIndex]
-            return `Day ${d.day} (${d.date})`
-          },
-          afterBody: (items) => {
-            const d = forecast[items[0].dataIndex]
-            return [`Healing score: ${d.healing_score}`]
-          },
+          title: (items) => { const d = forecast[items[0].dataIndex]; return `Day ${d.day} (${d.date})` },
+          afterBody: (items) => { const d = forecast[items[0].dataIndex]; return [`Healing score: ${d.healing_score}`] },
         },
       },
     },
     scales: {
       x: {
         ticks: { color: '#A89880', font: { family: 'DM Sans', size: 11 } },
-        grid:  { color: '#2E2820' },
-        border:{ color: '#2E2820' },
+        grid: { color: '#2E2820' }, border: { color: '#2E2820' },
       },
       y: {
         min: 0, max: 100,
         ticks: { color: '#A89880', font: { family: 'DM Sans', size: 11 }, callback: (v) => `${v}%` },
-        grid:  { color: '#2E2820' },
-        border:{ color: '#2E2820' },
+        grid: { color: '#2E2820' }, border: { color: '#2E2820' },
       },
     },
   }
@@ -222,10 +211,47 @@ function ForecastChart({ forecast }) {
       <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs font-sans">
         <span className="text-muted">14-day trajectory toward balance</span>
         <span className={delta >= 0 ? 'text-neem' : 'text-error'}>
-          Healing score: {healingStart} {delta >= 0 ? '->' : '->'} {healingEnd}
+          Healing score: {healingStart} {'->'}  {healingEnd}
           {delta >= 0 ? ` (+${delta.toFixed(1)})` : ` (${delta.toFixed(1)})`}
         </span>
       </div>
+    </div>
+  )
+}
+
+function DoctorMap({ clinics, userLocation }) {
+  if (!userLocation) return (
+    <div className="bg-surface border border-border rounded-card p-4 text-center text-muted text-sm font-sans">
+      Allow location access to see nearby doctors.
+    </div>
+  )
+
+  const hasClinicCoords = clinics.some(c => c.lat && c.lng)
+
+  return (
+    <div className="rounded-card overflow-hidden border border-border" style={{ height: '300px' }}>
+      <MapContainer
+        center={[userLocation.lat, userLocation.lng]}
+        zoom={12}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="© OpenStreetMap contributors"
+        />
+        {hasClinicCoords && clinics.map((c) =>
+          c.lat && c.lng ? (
+            <Marker key={c.id} position={[c.lat, c.lng]}>
+              <Popup>
+                <strong>{c.clinic_name || 'BAMS Clinic'}</strong><br />
+                <span style={{ fontSize: '12px', color: '#666' }}>
+                  {c.subscription_tier === 'pro' ? '⭐ Pro Clinic' : 'Verified BAMS Doctor'}
+                </span>
+              </Popup>
+            </Marker>
+          ) : null
+        )}
+      </MapContainer>
     </div>
   )
 }
@@ -245,6 +271,8 @@ export default function Results() {
   const [sharing, setSharing]           = useState(false)
   const [shareSuccess, setShareSuccess] = useState(false)
   const [doctorId, setDoctorId]         = useState('')
+  const [clinics, setClinics]           = useState([])
+  const [userLocation, setUserLocation] = useState(null)
 
   useEffect(() => {
     if (!scanId) return
@@ -264,6 +292,22 @@ export default function Results() {
       .catch(e => setError(e.response?.data?.detail || 'Failed to load results.'))
       .finally(() => setLoading(false))
   }, [scanId])
+
+  useEffect(() => {
+    // Get user location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => setUserLocation({ lat: 17.3297, lng: 76.8343 }) // fallback: Kalaburagi
+      )
+    } else {
+      setUserLocation({ lat: 17.3297, lng: 76.8343 })
+    }
+    // Fetch verified clinics
+    api.get('/clinics')
+      .then(r => setClinics(r.data || []))
+      .catch(() => {})
+  }, [])
 
   async function handleShare() {
     if (!doctorId.trim()) return
@@ -396,37 +440,40 @@ export default function Results() {
           </section>
         )}
 
-        {/* 7. Share with doctor */}
+        {/* 7. Nearby doctors map + share */}
         <section>
           <h2 className="font-display text-2xl text-textMain mb-4">Find a BAMS Doctor</h2>
-          <div className="bg-surface border border-border rounded-card p-6 flex flex-col gap-4">
-            {isSevere && (
-              <p className="text-error font-sans text-sm">
-                Your imbalance is severe. Please consult a BAMS doctor immediately.
-              </p>
-            )}
-            {shareSuccess ? (
-              <p className="text-neem font-sans text-sm">
-                Report shared successfully. The doctor will be notified.
-              </p>
-            ) : (
-              <>
-                <p className="font-sans text-sm text-muted">Enter a doctor's ID to share your report with them.</p>
-                <input
-                  value={doctorId}
-                  onChange={e => setDoctorId(e.target.value)}
-                  placeholder="Doctor ID"
-                  className="w-full bg-bg border border-border rounded-card px-4 py-2 text-textMain text-sm font-sans placeholder:text-hint focus:outline-none focus:border-primary"
-                />
-                <button
-                  onClick={handleShare}
-                  disabled={sharing || !doctorId.trim()}
-                  className="bg-primary text-bg rounded-full px-6 py-2 text-sm font-sans self-start disabled:opacity-50"
-                >
-                  {sharing ? 'Sharing...' : 'Share Report'}
-                </button>
-              </>
-            )}
+          {isSevere && (
+            <p className="text-error font-sans text-sm mb-3">
+              Your imbalance is severe. Please consult a BAMS doctor immediately.
+            </p>
+          )}
+          <div className="flex flex-col gap-4">
+            <DoctorMap clinics={clinics} userLocation={userLocation} />
+            <div className="bg-surface border border-border rounded-card p-6 flex flex-col gap-4">
+              {shareSuccess ? (
+                <p className="text-neem font-sans text-sm">
+                  Report shared successfully. The doctor will be notified.
+                </p>
+              ) : (
+                <>
+                  <p className="font-sans text-sm text-muted">Enter a doctor's ID to share your report with them.</p>
+                  <input
+                    value={doctorId}
+                    onChange={e => setDoctorId(e.target.value)}
+                    placeholder="Doctor ID"
+                    className="w-full bg-bg border border-border rounded-card px-4 py-2 text-textMain text-sm font-sans placeholder:text-hint focus:outline-none focus:border-primary"
+                  />
+                  <button
+                    onClick={handleShare}
+                    disabled={sharing || !doctorId.trim()}
+                    className="bg-primary text-bg rounded-full px-6 py-2 text-sm font-sans self-start disabled:opacity-50"
+                  >
+                    {sharing ? 'Sharing...' : 'Share Report'}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </section>
 
