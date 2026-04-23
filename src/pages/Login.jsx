@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 import api from '../api/axios';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { isDark } = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,106 +35,140 @@ export default function Login() {
     }
   }
 
+  const t = isDark ? {
+    page: 'rgba(13,11,8,0.85)',
+    nav: 'rgba(13,11,8,0.6)',
+    card: '#1C1712',
+    cardBorder: '#2E2820',
+    title: '#F5EDD6',
+    sub: '#A89880',
+    label: '#6B5E50',
+    input: '#0D0B08',
+    inputBorder: '#2E2820',
+    inputText: '#F5EDD6',
+    inputPlaceholder: '#6B5E50',
+    btnPrimary: '#E8A020',
+    btnPrimaryText: '#0D0B08',
+    btnGhost: 'transparent',
+    btnGhostBorder: '#2E2820',
+    btnGhostText: '#A89880',
+    divider: '#2E2820',
+    dividerText: '#6B5E50',
+    error: '#C0392B',
+    logo: '#E8A020',
+    back: '#A89880',
+  } : {
+    page: 'rgba(245,237,214,0.88)',
+    nav: 'rgba(245,237,214,0.85)',
+    card: 'rgba(255,252,245,0.95)',
+    cardBorder: 'rgba(59,42,26,0.12)',
+    title: '#2A1A08',
+    sub: 'rgba(59,42,26,0.5)',
+    label: 'rgba(59,42,26,0.4)',
+    input: 'rgba(255,252,245,0.8)',
+    inputBorder: 'rgba(59,42,26,0.15)',
+    inputText: '#2A1A08',
+    inputPlaceholder: 'rgba(59,42,26,0.3)',
+    btnPrimary: '#B85A00',
+    btnPrimaryText: '#fff',
+    btnGhost: 'transparent',
+    btnGhostBorder: 'rgba(59,42,26,0.15)',
+    btnGhostText: 'rgba(59,42,26,0.5)',
+    divider: 'rgba(59,42,26,0.1)',
+    dividerText: 'rgba(59,42,26,0.3)',
+    error: '#C0392B',
+    logo: '#B85A00',
+    back: 'rgba(59,42,26,0.5)',
+  };
+
   return (
-    <div
-      className="relative min-h-screen bg-bg text-textMain font-sans flex flex-col overflow-hidden"
-      style={{
-        backgroundImage:
-          'url(https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=1920&q=80)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 z-0" style={{ backgroundColor: 'rgba(13, 11, 8, 0.85)' }} />
+    <div style={{
+      position: 'relative',
+      minHeight: '100vh',
+      fontFamily: "'DM Sans', sans-serif",
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      backgroundImage: 'url(https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=1920&q=80)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      transition: 'all 0.4s ease',
+    }}>
+      {/* Overlay */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: t.page, transition: 'background 0.4s ease' }} />
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-20 flex justify-between items-center px-8 py-5">
-        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(13, 11, 8, 0.60)' }} />
-        <button
-          onClick={() => navigate('/')}
-          className="relative font-display text-primary text-xl tracking-widest uppercase cursor-pointer"
-        >
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', backgroundColor: t.nav, transition: 'background 0.4s ease' }}>
+        <button onClick={() => navigate('/')} style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: t.logo, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>
           Sushrutha AI
         </button>
-        <button
-          onClick={() => navigate('/role')}
-          className="relative text-muted hover:text-textMain text-sm font-sans cursor-pointer transition-colors duration-200"
-        >
-          Back
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <ThemeToggle />
+          <button onClick={() => navigate('/role')} style={{ fontSize: 13, color: t.back, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+            ← Back
+          </button>
+        </div>
       </nav>
 
-      {/* Center card */}
-      <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 pt-24 pb-16">
-        <div className="bg-surface border border-border rounded-card p-8 w-full max-w-sm mx-auto">
+      {/* Card */}
+      <div style={{ position: 'relative', zIndex: 10, display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', padding: '100px 24px 60px' }}>
+        <div style={{ background: t.card, border: `1px solid ${t.cardBorder}`, borderRadius: 16, padding: '36px 32px', width: '100%', maxWidth: 380, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', transition: 'all 0.4s ease' }}>
 
-          <h1 className="font-display text-3xl text-textMain font-normal mb-1">
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, color: t.title, marginBottom: 6, lineHeight: 1.1 }}>
             Welcome back
           </h1>
-          <p className="font-sans text-sm text-muted mb-8">
+          <p style={{ fontSize: 14, color: t.sub, marginBottom: 28, fontWeight: 300 }}>
             Sign in to your Sushrutha AI account
           </p>
 
           <form onSubmit={handleSubmit} noValidate>
 
             {/* Email */}
-            <div className="mb-4">
-              <label className="block text-xs text-hint font-sans tracking-widest uppercase mb-1">
-                Email
-              </label>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 10, color: t.label, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 6, fontWeight: 500 }}>Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-textMain text-sm font-sans placeholder:text-hint focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-200"
+                style={{ width: '100%', background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 8, padding: '12px 16px', color: t.inputText, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', transition: 'all 0.3s ease' }}
               />
             </div>
 
             {/* Password */}
-            <div className="mb-2">
-              <label className="block text-xs text-hint font-sans tracking-widest uppercase mb-1">
-                Password
-              </label>
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ display: 'block', fontSize: 10, color: t.label, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 6, fontWeight: 500 }}>Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-textMain text-sm font-sans placeholder:text-hint focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-200"
+                style={{ width: '100%', background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 8, padding: '12px 16px', color: t.inputText, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', transition: 'all 0.3s ease' }}
               />
             </div>
 
-            {/* Error */}
-            {error && (
-              <p className="text-error text-xs font-sans mt-1 mb-2">{error}</p>
-            )}
+            {error && <p style={{ color: t.error, fontSize: 13, marginBottom: 8 }}>{error}</p>}
 
-            {/* Sign In button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-bg font-sans font-medium text-sm py-3 rounded-full mt-2 hover:bg-accent transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ width: '100%', background: t.btnPrimary, color: t.btnPrimaryText, border: 'none', borderRadius: 8, padding: '13px', fontSize: 14, fontWeight: 500, fontFamily: "'DM Sans', sans-serif", cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1, marginTop: 8, transition: 'all 0.3s ease' }}
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
 
-            {/* Divider */}
-            <div className="flex items-center gap-3 my-6">
-              <span className="border-t border-border flex-1" />
-              <span className="text-hint text-xs font-sans">or</span>
-              <span className="border-t border-border flex-1" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+              <span style={{ flex: 1, height: '0.5px', background: t.divider }} />
+              <span style={{ fontSize: 12, color: t.dividerText }}>or</span>
+              <span style={{ flex: 1, height: '0.5px', background: t.divider }} />
             </div>
 
-            {/* Create account */}
             <button
               type="button"
               onClick={() => navigate('/role')}
-              className="w-full border border-border text-muted font-sans text-sm py-3 rounded-full hover:border-primary hover:text-textMain transition-all duration-300"
+              style={{ width: '100%', background: t.btnGhost, border: `1px solid ${t.btnGhostBorder}`, borderRadius: 8, padding: '12px', fontSize: 14, color: t.btnGhostText, fontFamily: "'DM Sans', sans-serif", cursor: 'pointer', transition: 'all 0.3s ease' }}
             >
               Create an account
             </button>
@@ -139,6 +176,8 @@ export default function Login() {
           </form>
         </div>
       </div>
+
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap');`}</style>
     </div>
   );
 }
